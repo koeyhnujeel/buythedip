@@ -19,10 +19,10 @@ public class News {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long Id;
+	private Long id;
 
 	@Column(nullable = false)
-	private String headLine;
+	private String headline;
 
 	@Column(columnDefinition = "TEXT", nullable = false)
 	private String summary;
@@ -34,24 +34,24 @@ public class News {
 	private String url;
 
 	@Column(nullable = false)
-	private Long dateTime;
+	private Long datetime;
 
 	@Builder
-	private News(String headLine, String summary, String source, String url, Long dateTime) {
-		this.headLine = headLine;
+	private News(String headline, String summary, String source, String url, Long datetime) {
+		this.headline = headline;
 		this.summary = summary;
 		this.source = source;
 		this.url = url;
-		this.dateTime = dateTime;
+		this.datetime = datetime;
 	}
 
 	public static News from(NewsDto translatedNewsDto) {
 		return News.builder()
-			.headLine(translatedNewsDto.getHeadLine())
+			.headline(translatedNewsDto.getHeadline())
 			.summary(translatedNewsDto.getSummary())
 			.source(translatedNewsDto.getSource())
 			.url(translatedNewsDto.getUrl())
-			.dateTime(translatedNewsDto.getDateTime())
+			.datetime(translatedNewsDto.getDatetime())
 			.build();
 	}
 }

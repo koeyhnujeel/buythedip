@@ -28,7 +28,7 @@ public class NewsTranslationService {
 	public void translateNews(List<NewsDto> newsDtoList) {
 		List<NewsDto> translatedNewsDtoList = newsDtoList.stream()
 			.map(newsDto -> {
-				String headLine = newsDto.getHeadLine();
+				String headLine = newsDto.getHeadline();
 				String summary = newsDto.getSummary();
 				GeminiResponseDto geminiResponseDto = geminiClient.translateHeadlineAndSummary(headLine, summary).block();
 

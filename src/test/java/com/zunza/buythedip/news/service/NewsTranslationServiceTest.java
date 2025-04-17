@@ -39,7 +39,7 @@ class NewsTranslationServiceTest {
 	void 뉴스_리스트가_들어오면_헤드라인과_요약을_번역하고_큐에_전송한다() {
 		// given
 		NewsDto newsDto = NewsDto.builder()
-			.headLine("Original Headline")
+			.headline("Original Headline")
 			.summary("Original Summary")
 			.build();
 
@@ -50,7 +50,7 @@ class NewsTranslationServiceTest {
 		CandidateDto candidateDto = CandidateDto.from(contentDto);
 		GeminiResponseDto geminiResponseDto = GeminiResponseDto.from(List.of(candidateDto));
 
-		when(geminiClient.translateHeadlineAndSummary(newsDto.getHeadLine(), newsDto.getSummary()))
+		when(geminiClient.translateHeadlineAndSummary(newsDto.getHeadline(), newsDto.getSummary()))
 			.thenReturn(Mono.just(geminiResponseDto));
 
 		List<NewsDto> newsDtoList = List.of(newsDto);
@@ -69,7 +69,7 @@ class NewsTranslationServiceTest {
 		List<NewsDto> translatedNewsDtoList = captor.getValue();
 		NewsDto translatedNewsDto = translatedNewsDtoList.get(0);
 
-		assertEquals(translatedNewsDto.getHeadLine(), "번역된 헤드라인");
+		assertEquals(translatedNewsDto.getHeadline(), "번역된 헤드라인");
 		assertEquals(translatedNewsDto.getSummary(), "번역된 요약");
 	}
 }

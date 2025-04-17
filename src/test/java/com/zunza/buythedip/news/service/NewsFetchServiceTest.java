@@ -67,9 +67,9 @@ class NewsFetchServiceTest {
 				eq(RabbitMQConstants.NEWS_TRANSLATION_ROUTING_KEY),
 				argThat((List<NewsDto> newsDtoList) ->
 					newsDtoList.size() == 3 &&
-						newsDtoList.get(0).getHeadLine().equals("sample headline101") &&
-						newsDtoList.get(1).getHeadLine().equals("sample headline102") &&
-						newsDtoList.get(2).getHeadLine().equals("sample headline103")
+						newsDtoList.get(0).getHeadline().equals("sample headline101") &&
+						newsDtoList.get(1).getHeadline().equals("sample headline102") &&
+						newsDtoList.get(2).getHeadline().equals("sample headline103")
 				)
 			);
 

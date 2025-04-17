@@ -6,33 +6,33 @@ import lombok.Getter;
 
 @Getter
 public class NewsDto {
-	private String headLine;
+	private String headline;
 	private String source;
 	private String summary;
 	private String url;
-	private Long dateTime;
+	private Long datetime;
 
 	@Builder
-	private NewsDto(String headLine, String source, String summary, String url, Long dateTime) {
-		this.headLine = headLine;
+	private NewsDto(String headline, String source, String summary, String url, Long datetime) {
+		this.headline = headline;
 		this.source = source;
 		this.summary = summary;
 		this.url = url;
-		this.dateTime = dateTime;
+		this.datetime = datetime;
 	}
 
 	public static NewsDto from(MarketNews marketNews) {
 		return NewsDto.builder()
-			.headLine(marketNews.getHeadline())
+			.headline(marketNews.getHeadline())
 			.source(marketNews.getSource())
 			.summary(marketNews.getSummary())
 			.url(marketNews.getUrl())
-			.dateTime(marketNews.getDatetime())
+			.datetime(marketNews.getDatetime())
 			.build();
 	}
 
 	public void modifyHeadLine(String translatedHeadLine) {
-		this.headLine = translatedHeadLine;
+		this.headline = translatedHeadLine;
 	}
 
 	public void modifySummary(String translatedSummary) {
