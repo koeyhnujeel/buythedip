@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zunza.buythedip.news.dto.NewsDetailResponseDto;
 import com.zunza.buythedip.news.dto.NewsListResponseDto;
 import com.zunza.buythedip.news.service.NewsService;
 
@@ -24,5 +26,12 @@ public class NewsController {
 		@RequestParam(defaultValue = "20") int size
 	) {
 		return ResponseEntity.ok(newsService.getNewsList(cursor, size));
+	}
+
+	@GetMapping("/api/news/{newsId}")
+	public ResponseEntity<NewsDetailResponseDto> getNews(
+		@PathVariable Long newsId
+	) {
+		return ResponseEntity.ok(newsService.getNews(newsId));
 	}
 }
