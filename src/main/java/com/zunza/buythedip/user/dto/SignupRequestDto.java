@@ -3,9 +3,11 @@ package com.zunza.buythedip.user.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class SignupRequestDto {
 
 	@NotBlank(message = "아이디는 필수 입력 값입니다.")
