@@ -33,10 +33,7 @@ public class GlobalResponseAdvice implements ResponseBodyAdvice<Object> {
 		int statusCode = httpServletResponse.getStatus();
 
 		if (body == null) {
-			return ApiResponse.builder()
-				.data(null)
-				.code(statusCode)
-				.build();
+			return null;
 		}
 
 		if (body instanceof ApiResponse<?>) {
