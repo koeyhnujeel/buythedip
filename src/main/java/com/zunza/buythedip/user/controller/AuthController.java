@@ -12,6 +12,7 @@ import com.zunza.buythedip.user.dto.SignupRequestDto;
 import com.zunza.buythedip.user.entity.DuplicateCheckType;
 import com.zunza.buythedip.user.service.AuthService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,7 +23,7 @@ public class AuthController {
 
 	@PostMapping("/api/auth/signup")
 	public ResponseEntity<Void> signup(
-		@RequestBody SignupRequestDto signupRequestDto
+		@Valid @RequestBody SignupRequestDto signupRequestDto
 	) {
 		authService.signup(signupRequestDto);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
