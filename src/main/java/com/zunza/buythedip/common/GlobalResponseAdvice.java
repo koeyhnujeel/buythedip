@@ -1,12 +1,16 @@
 package com.zunza.buythedip.common;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -55,6 +59,30 @@ public class GlobalResponseAdvice implements ResponseBodyAdvice<Object> {
 		ApiResponse<Object> apiResponse = ApiResponse.builder()
 			.data(errorResponse)
 			.code(e.getStatusCode())
+			.build();
+
+		return ResponseEntity.status(e.getStatusCode()).body(apiResponse);
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ApiResponse<Object>> methodArgumentNotValidExceptionHandler(
+		MethodArgumentNotValidException e) {
+
+		List<String> errorMessages = e.getFieldErrors().stream()
+			.map(DefaultMessageSourceResolvable::getDefaultMessage)
+			.toList();
+
+		String message = errorMessages.size() == 1 ? errorMessages.get(0) : null;
+		List<String> messages = errorMessages.size() > 1 ? errorMessages : null;
+
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.message(message)
+			.messages(messages)
+			.build();
+
+		ApiResponse<Object> apiResponse = ApiResponse.builder()
+			.data(errorResponse)
+			.code(e.getStatusCode().value())
 			.build();
 
 		return ResponseEntity.status(e.getStatusCode()).body(apiResponse);
