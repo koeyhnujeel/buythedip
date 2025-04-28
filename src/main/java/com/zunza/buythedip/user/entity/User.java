@@ -37,10 +37,10 @@ public class User {
 		this.nickname = nickname;
 	}
 
-	public static User from(SignupRequestDto signupRequestDto) {
+	public static User of(SignupRequestDto signupRequestDto, String encodedPassword) {
 		return User.builder()
 			.accountId(signupRequestDto.getAccountId())
-			.password(signupRequestDto.getPassword())
+			.password(encodedPassword)
 			.nickname(signupRequestDto.getNickname())
 			.build();
 	}

@@ -1,7 +1,17 @@
 package com.zunza.buythedip.user.service;
 
+import java.util.Map;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.zunza.buythedip.security.CustomUserDetails;
+import com.zunza.buythedip.security.JwtTokenProvider;
+import com.zunza.buythedip.security.RefreshTokenService;
+import com.zunza.buythedip.user.dto.LoginRequestDto;
 import com.zunza.buythedip.user.dto.SignupRequestDto;
 import com.zunza.buythedip.user.entity.DuplicateCheckType;
 import com.zunza.buythedip.user.entity.User;
@@ -16,6 +26,10 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
+	private final JwtTokenProvider jwtTokenProvider;
+	private final RefreshTokenService refreshTokenService;
+	private final AuthenticationManager authenticationManager;
 
 	public void signup(SignupRequestDto signupRequestDto) {
 		if (userRepository.existsByAccountId(signupRequestDto.getAccountId())) {
@@ -26,7 +40,8 @@ public class AuthService {
 			throw new DuplicateNicknameException();
 		}
 
-		userRepository.save(User.from(signupRequestDto));
+		String encodedPassword = passwordEncoder.encode(signupRequestDto.getPassword());
+		userRepository.save(User.of(signupRequestDto,encodedPassword));
 	}
 
 	public void validateDuplicateField(DuplicateCheckType type, String value) {
@@ -45,5 +60,23 @@ public class AuthService {
 
 			default -> throw new IllegalArgumentException("지원하지 않는 필드 타입입니다.");
 		}
+	}
+
+	public Map<String, String> login(LoginRequestDto loginRequestDto) {
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+			loginRequestDto.getAccountId(), loginRequestDto.getPassword());
+
+		Authentication authenticate = authenticationManager.authenticate(authenticationToken);
+		String accessToken = jwtTokenProvider.generateAccessToken(authenticate);
+		String refreshToken = jwtTokenProvider.generateRefreshToken(authenticate);
+
+		CustomUserDetails principal = (CustomUserDetails)authenticate.getPrincipal();
+		refreshTokenService.saveRefreshToken(principal.getUserId(), refreshToken);
+
+		return Map.of(
+			"nickname", principal.getNickname(),
+			"accessToken", accessToken,
+			"refreshToken", refreshToken
+		);
 	}
 }

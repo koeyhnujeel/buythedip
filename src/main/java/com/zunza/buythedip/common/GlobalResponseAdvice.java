@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -86,5 +87,23 @@ public class GlobalResponseAdvice implements ResponseBodyAdvice<Object> {
 			.build();
 
 		return ResponseEntity.status(e.getStatusCode()).body(apiResponse);
+	}
+
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<ApiResponse<Object>> authenticationExceptionHandler(
+		AuthenticationException e
+	) {
+		String message = "아이디 또는 비밀번호를 확인해 주세요.";
+		ErrorResponse errorResponse = ErrorResponse.builder()
+			.message(message)
+			.build();
+
+		int statusCode = HttpServletResponse.SC_UNAUTHORIZED;
+		ApiResponse<Object> apiResponse = ApiResponse.builder()
+			.data(errorResponse)
+			.code(statusCode)
+			.build();
+
+		return ResponseEntity.status(statusCode).body(apiResponse);
 	}
 }
