@@ -13,7 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zunza.buythedip.security.JwtAuthenticationEntryPoint;
 import com.zunza.buythedip.security.JwtAuthenticationFilter;
+import com.zunza.buythedip.security.JwtExceptionFilter;
 import com.zunza.buythedip.security.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final JwtTokenProvider jwtTokenProvider;
+	private final ObjectMapper objectMapper;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -42,8 +46,15 @@ public class SecurityConfig {
 				.anyRequest().authenticated()
 			)
 
+			.addFilterBefore(new JwtExceptionFilter(objectMapper),
+				UsernamePasswordAuthenticationFilter.class
+			)
 			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
 				UsernamePasswordAuthenticationFilter.class
+			)
+
+			.exceptionHandling(e ->
+				e.authenticationEntryPoint(new JwtAuthenticationEntryPoint(objectMapper))
 			);
 
 		return http.build();
