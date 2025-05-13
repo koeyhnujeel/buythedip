@@ -2,25 +2,30 @@ package com.zunza.buythedip.user.controller;
 
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zunza.buythedip.user.dto.LoginRequestDto;
 import com.zunza.buythedip.user.dto.LoginSuccessResponseDto;
+import com.zunza.buythedip.user.dto.ReissueTokenResponseDto;
 import com.zunza.buythedip.user.dto.SignupRequestDto;
 import com.zunza.buythedip.user.entity.DuplicateCheckType;
 import com.zunza.buythedip.user.service.AuthService;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
@@ -53,18 +58,36 @@ public class AuthController {
 
 	@PostMapping("/api/auth/login")
 	public ResponseEntity<LoginSuccessResponseDto> login(
-		@RequestBody LoginRequestDto loginRequestDto,
-		HttpServletResponse response
+		@RequestBody LoginRequestDto loginRequestDto
 	) {
 		Map<String, String> result = authService.login(loginRequestDto);
 
-		Cookie refreshTokenCookie = new Cookie("refreshToken", result.get("refreshToken"));
-		refreshTokenCookie.setHttpOnly(true);
-		refreshTokenCookie.setPath("/");
-		refreshTokenCookie.setMaxAge((int) (7 * 24 * 60 * 60 * 1000));
+		ResponseCookie refreshTokenCookie = setRefreshTokenCookie(result.get("refreshToken"));
 
-		response.addCookie(refreshTokenCookie);
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+			.body(LoginSuccessResponseDto.of(result.get("nickname"), result.get("accessToken")));
+	}
 
-		return ResponseEntity.ok(LoginSuccessResponseDto.of(result.get("nickname"), result.get("accessToken")));
+	@PostMapping("/api/auth/reissue")
+	public ResponseEntity<ReissueTokenResponseDto> reissueToken(
+		@RequestHeader(name = "Authorization", required = false) String authorizationHeader,
+		@CookieValue(name = "refreshToken", required = false) String refreshToken
+	) {
+		Map<String, String> reissueToken = authService.reissue(authorizationHeader, refreshToken);
+
+		ResponseCookie refreshTokenCookie = setRefreshTokenCookie(reissueToken.get("newRefreshToken"));
+
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+			.body(ReissueTokenResponseDto.from(reissueToken.get("newAccessToken")));
+	}
+
+	private ResponseCookie setRefreshTokenCookie(String refreshToken) {
+		return ResponseCookie.from("refreshToken", refreshToken)
+			.httpOnly(true)
+			.path("/")
+			.maxAge((int)(7 * 24 * 60 * 60 * 1000))
+			.build();
 	}
 }

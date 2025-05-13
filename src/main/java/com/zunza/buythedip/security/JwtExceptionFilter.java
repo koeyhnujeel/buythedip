@@ -26,9 +26,15 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
+		String requestURI = request.getRequestURI();
+
 		try{
 			filterChain.doFilter(request, response);
 		} catch (ExpiredJwtException e) {
+			if (requestURI.equals("/api/auth/reissue")) {
+				filterChain.doFilter(request, response);
+			}
+
 			ErrorResponse errorResponse = ErrorResponse.builder()
 				.message("만료된 JWT 토큰 입니다.")
 				.build();

@@ -43,6 +43,7 @@ public class SecurityConfig {
 
 			.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers("/api/auth/**").permitAll()
+				.requestMatchers("/api/news/**").permitAll()
 				.anyRequest().authenticated()
 			)
 
