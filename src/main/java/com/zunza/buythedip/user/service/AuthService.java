@@ -11,14 +11,17 @@ import org.springframework.stereotype.Service;
 import com.zunza.buythedip.security.CustomUserDetails;
 import com.zunza.buythedip.security.JwtTokenProvider;
 import com.zunza.buythedip.security.RefreshTokenService;
+import com.zunza.buythedip.security.util.TokenUtil;
 import com.zunza.buythedip.user.dto.LoginRequestDto;
 import com.zunza.buythedip.user.dto.SignupRequestDto;
 import com.zunza.buythedip.user.entity.DuplicateCheckType;
 import com.zunza.buythedip.user.entity.User;
 import com.zunza.buythedip.user.exception.DuplicateAccountIdException;
 import com.zunza.buythedip.user.exception.DuplicateNicknameException;
+import com.zunza.buythedip.user.exception.UserNotFoundException;
 import com.zunza.buythedip.user.repository.UserRepository;
 
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -77,6 +80,35 @@ public class AuthService {
 			"nickname", principal.getNickname(),
 			"accessToken", accessToken,
 			"refreshToken", refreshToken
+		);
+	}
+
+	public Map<String, String> reissue(String authorizationHeader, String refreshToken) {
+		String expiredAccessToken = TokenUtil.resolveToken(authorizationHeader);
+		Claims claims = jwtTokenProvider.parseClaims(expiredAccessToken);
+		Long userId = claims.get("userId", Long.class);
+
+		jwtTokenProvider.validateToken(refreshToken);
+		if (!refreshTokenService.validateRefreshToken(userId, refreshToken)) {
+			throw new IllegalArgumentException("리프레시 토큰 불일치");
+		}
+
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new UserNotFoundException(userId));
+
+		CustomUserDetails customUserDetails = new CustomUserDetails(user);
+		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+			customUserDetails, null, customUserDetails.getAuthorities());
+
+		String newAccessToken = jwtTokenProvider.generateAccessToken(authentication);
+		String newRefreshToken = jwtTokenProvider.generateRefreshToken(authentication);
+
+		refreshTokenService.deleteRefreshToken(userId);
+		refreshTokenService.saveRefreshToken(userId, newRefreshToken);
+
+		return Map.of(
+			"newAccessToken", newAccessToken,
+			"newRefreshToken", newRefreshToken
 		);
 	}
 }

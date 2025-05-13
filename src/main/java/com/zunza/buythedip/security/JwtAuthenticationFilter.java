@@ -7,6 +7,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.zunza.buythedip.security.util.TokenUtil;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	public static final String AUTHORIZATION_HEADER = "Authorization";
-	public static final String TOKEN_PREFIX = "Bearer ";
 
 	private final JwtTokenProvider jwtTokenProvider;
 
@@ -25,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-		String jwt = resolveToken(request);
+		String jwt = TokenUtil.resolveToken(request.getHeader(AUTHORIZATION_HEADER));
 
 		if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
 			Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
@@ -33,15 +34,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 
 		filterChain.doFilter(request, response);
-	}
-
-	private String resolveToken(HttpServletRequest request) {
-		String token = request.getHeader(AUTHORIZATION_HEADER);
-
-		if (StringUtils.hasText(token) && token.startsWith(TOKEN_PREFIX)) {
-			return token.substring(7);
-		}
-
-		return null;
 	}
 }
