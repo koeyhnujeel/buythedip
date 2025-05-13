@@ -111,4 +111,8 @@ public class AuthService {
 			"newRefreshToken", newRefreshToken
 		);
 	}
+
+	public void logout(Long userId) {
+		refreshTokenService.deleteRefreshToken(userId);
+	}
 }

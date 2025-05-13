@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -88,6 +89,23 @@ public class AuthController {
 			.httpOnly(true)
 			.path("/")
 			.maxAge((int)(7 * 24 * 60 * 60 * 1000))
+			.build();
+	}
+
+	@PostMapping("/api/auth/logout")
+	public ResponseEntity<Void> logout(
+		@AuthenticationPrincipal Long userId
+	) {
+		authService.logout(userId);
+
+		ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", null)
+			.httpOnly(true)
+			.path("/")
+			.maxAge(0)
+			.build();
+
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
 			.build();
 	}
 }
