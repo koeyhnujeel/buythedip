@@ -1,53 +1,34 @@
 package com.zunza.buythedip.news.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import javax.sql.DataSource;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.zunza.buythedip.news.dto.NewsDetailResponseDto;
 import com.zunza.buythedip.news.entity.News;
 import com.zunza.buythedip.news.exception.NewsNotFoundException;
 import com.zunza.buythedip.news.repository.NewsRepository;
 
-@Testcontainers
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class NewsServiceTest {
 
-	@Container
-	static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
-		.withDatabaseName("testdb")
-		.withUsername("testuser")
-		.withPassword("testpass");
-
-	@DynamicPropertySource
-	static void overrideProperties(DynamicPropertyRegistry registry) {
-		registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-		registry.add("spring.datasource.username", mysqlContainer::getUsername);
-		registry.add("spring.datasource.password", mysqlContainer::getPassword);
-		registry.add("spring.datasource.driver-class-name", mysqlContainer::getDriverClassName);
-	}
-
-	@Autowired
-	private NewsService newsService;
-
-	@Autowired
+	@Mock
 	private NewsRepository newsRepository;
 
-	@Autowired
-	private DataSource dataSource;
+	@InjectMocks
+	private NewsService newsService;
 
 	@Test
 	void 뉴스_단건_조회_성공() {
 		// given
+		Long newsId = 1L;
 		News news = News.builder()
 			.headline("헤드라인")
 			.summary("요약")
@@ -55,10 +36,11 @@ class NewsServiceTest {
 			.url("url")
 			.datetime(23213L)
 			.build();
-		News saved = newsRepository.save(news);
+
+		when(newsRepository.findById(newsId)).thenReturn(Optional.of(news));
 
 		// when
-		NewsDetailResponseDto newsDetailResponseDto = newsService.getNews(saved.getId());
+		NewsDetailResponseDto newsDetailResponseDto = newsService.getNews(newsId);
 
 		// then
 		assertEquals("헤드라인", newsDetailResponseDto.getHeadline());
@@ -72,6 +54,8 @@ class NewsServiceTest {
 	void 뉴스_단건_조회_실패_시_예외를_던진다() {
 		// given
 		Long newsId = 2L;
+
+		when(newsRepository.findById(newsId)).thenReturn(Optional.empty());
 
 		// when - then
 		assertThrows(NewsNotFoundException.class, () ->
