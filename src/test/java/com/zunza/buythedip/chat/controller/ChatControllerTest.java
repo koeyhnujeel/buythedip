@@ -97,11 +97,14 @@ class ChatControllerTest {
 
 
 		String testToken = createTestToken();
-		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-		headers.add("Authorization", "Bearer " + testToken);
+		StompHeaders stompHeaders = new StompHeaders();
+		stompHeaders.add("Authorization", "Bearer " + testToken);
+		WebSocketHttpHeaders httpHeaders = new WebSocketHttpHeaders();
+		httpHeaders.add("Authorization", "Bearer " + testToken);
+
 
 		stompSession = stompClient
-			.connectAsync("ws://localhost:" + port + "/ws-chat", headers, new StompSessionHandlerAdapter() {})
+			.connectAsync("ws://localhost:" + port + "/ws-chat", httpHeaders, stompHeaders, new StompSessionHandlerAdapter() {})
 			.get(2, TimeUnit.SECONDS);
 	}
 
