@@ -45,6 +45,7 @@ public class SecurityConfig {
 				.requestMatchers("/api/auth/**").permitAll()
 				.requestMatchers("/api/news/**").permitAll()
 				.requestMatchers("/ws-chat/**").permitAll()
+				.requestMatchers("/ws-market/**").permitAll()
 				.anyRequest().authenticated()
 			)
 
