@@ -3,6 +3,7 @@ package com.zunza.buythedip.chat.service;
 import org.springframework.stereotype.Service;
 
 import com.zunza.buythedip.chat.dto.ChatMessageDto;
+import com.zunza.buythedip.constant.ChannelNames;
 import com.zunza.buythedip.infrastructure.redis.RedisMessagePublisher;
 import com.zunza.buythedip.infrastructure.redis.RedisStreamService;
 
@@ -16,7 +17,7 @@ public class ChatService {
 	private final RedisStreamService redisStreamService;
 
 	public void sendMessage(String accountId, ChatMessageDto chatMessageDto) {
-		redisMessagePublisher.publishMessage(chatMessageDto);
+		redisMessagePublisher.publishMessage(ChannelNames.CHAT_MESSAGE_TOPIC, chatMessageDto);
 		redisStreamService.addToStream(accountId, chatMessageDto);
 	}
 }

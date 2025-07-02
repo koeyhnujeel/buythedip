@@ -3,6 +3,7 @@ package com.zunza.buythedip.chat.service;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -47,16 +48,12 @@ public class ChatMessageBatchService {
 
 		List<MapRecord<String, Object, Object>> messages = redisStreamService.read(GROUP_NAME, CONSUMER_NAME, readOptions, STREAM_KEY);
 
-		if (messages == null || messages.isEmpty()) {
-			return;
-		}
-
-		List<ChatMessage> chatMessages = convertToDocuments(messages);
-		mongoTemplate.insertAll(chatMessages);
-
-		for (MapRecord<String, Object, Object> message : messages) {
-			redisStreamService.ack(STREAM_KEY, GROUP_NAME, message.getId());
-		}
+		Optional.ofNullable(messages)
+			.filter(records -> !records.isEmpty())
+			.ifPresent(records -> {
+				mongoTemplate.insertAll(convertToDocuments(records));
+				records.forEach(record -> redisStreamService.ack(STREAM_KEY, GROUP_NAME, record.getId()));
+			});
 	}
 
 	private List<ChatMessage> convertToDocuments(List<MapRecord<String, Object, Object>> messages) {
