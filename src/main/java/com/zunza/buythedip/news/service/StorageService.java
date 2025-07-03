@@ -17,12 +17,14 @@ import lombok.RequiredArgsConstructor;
 public class StorageService {
 
 	private final NewsRepository newsRepository;
+	private final NewsCacheService newsCacheService;
 
 	@RabbitListener(queues = RabbitMQConstants.NEWS_STORAGE_QUEUE)
 	public void saveNews(List<NewsDto> translatedNewsDtoList) {
 		List<News> newsList = translatedNewsDtoList.stream()
 			.map(News::from)
 			.toList();
-		newsRepository.saveAll(newsList);
+		List<News> saved = newsRepository.saveAll(newsList);
+		newsCacheService.cacheNewsList(saved);
 	}
 }
