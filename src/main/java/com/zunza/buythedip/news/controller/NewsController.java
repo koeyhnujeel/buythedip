@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.zunza.buythedip.news.dto.NewsDetailResponseDto;
 import com.zunza.buythedip.news.dto.NewsListResponseDto;
+import com.zunza.buythedip.news.service.NewsCacheService;
 import com.zunza.buythedip.news.service.NewsService;
 
 import lombok.RequiredArgsConstructor;
@@ -19,13 +20,23 @@ import lombok.RequiredArgsConstructor;
 public class NewsController {
 
 	private final NewsService newsService;
+	private final NewsCacheService newsCacheService;
 
 	@GetMapping("/api/news")
 	public ResponseEntity<List<NewsListResponseDto>> getNewsList(
 		@RequestParam(required = false) Long cursor,
 		@RequestParam(defaultValue = "20") int size
 	) {
-		return ResponseEntity.ok(newsService.getNewsList(cursor, size));
+		List<NewsListResponseDto> cachedNewsList = newsCacheService.getCachedNewsList(cursor, size);
+
+		if (cachedNewsList == null || cachedNewsList.isEmpty()) {
+			List<NewsListResponseDto> newsList = newsService.getNewsList(cursor, size);
+			newsCacheService.cacheMissedNews(newsList);
+			return ResponseEntity.ok(newsList);
+		}
+
+		return ResponseEntity.ok(cachedNewsList);
+		// return ResponseEntity.ok(newsService.getNewsList(cursor, size));
 	}
 
 	@GetMapping("/api/news/{newsId}")
