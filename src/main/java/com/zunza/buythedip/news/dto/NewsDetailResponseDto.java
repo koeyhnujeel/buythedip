@@ -4,8 +4,10 @@ import com.zunza.buythedip.news.entity.News;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class NewsDetailResponseDto {
 	private Long id;
 	private String headline;
