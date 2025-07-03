@@ -93,6 +93,6 @@ public class StompHandler implements ChannelInterceptor {
 	}
 
 	private boolean isChatEndpoint(String endpoint) {
-		return endpoint != null && endpoint.startsWith("/ws-chat");
+		return endpoint != null && endpoint.startsWith("/ws/chat");
 	}
 }
