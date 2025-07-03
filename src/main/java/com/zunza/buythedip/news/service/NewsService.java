@@ -2,8 +2,10 @@ package com.zunza.buythedip.news.service;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.zunza.buythedip.constant.CacheNames;
 import com.zunza.buythedip.news.dto.NewsDetailResponseDto;
 import com.zunza.buythedip.news.dto.NewsListResponseDto;
 import com.zunza.buythedip.news.entity.News;
@@ -22,6 +24,7 @@ public class NewsService {
 		return newsRepository.findByCursor(cursor, size);
 	}
 
+	@Cacheable(value = CacheNames.NEWS_DETAIL, key = "#newsId")
 	public NewsDetailResponseDto getNews(Long newsId) {
 		News news = newsRepository.findById(newsId)
 			.orElseThrow(() -> new NewsNotFoundException(newsId));
