@@ -7,6 +7,7 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
+import com.zunza.buythedip.constant.ChannelNames;
 import com.zunza.buythedip.infrastructure.redis.RedisMessageSubscriber;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,22 @@ public class RedisListenerConfig {
 
 	@Bean
 	public ChannelTopic chatMessageTopic() {
-		return new ChannelTopic("chat:message");
+		return new ChannelTopic(ChannelNames.CHAT_MESSAGE_TOPIC);
+	}
+
+	@Bean
+	public ChannelTopic topPriceTickTopic() {
+		return new ChannelTopic(ChannelNames.TOP_PRICE_TICK_TOPIC);
+	}
+
+	@Bean
+	public ChannelTopic topVolumeTopic() {
+		return new ChannelTopic(ChannelNames.TOP_VOLUME_TOPIC);
+	}
+
+	@Bean
+	public ChannelTopic symbolTickerTopic() {
+		return new ChannelTopic(ChannelNames.SYMBOL_TICKER_TOPIC);
 	}
 
 	@Bean
@@ -33,6 +49,9 @@ public class RedisListenerConfig {
 		RedisMessageListenerContainer listenerContainer = new RedisMessageListenerContainer();
 		listenerContainer.setConnectionFactory(redisConnectionFactory);
 		listenerContainer.addMessageListener(listenerAdapter(), chatMessageTopic());
+		listenerContainer.addMessageListener(listenerAdapter(), topPriceTickTopic());
+		listenerContainer.addMessageListener(listenerAdapter(), topVolumeTopic());
+		listenerContainer.addMessageListener(listenerAdapter(), symbolTickerTopic());
 		return listenerContainer;
 	}
 }
