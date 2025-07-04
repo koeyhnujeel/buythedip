@@ -48,7 +48,7 @@ dependencies {
 
 
 	implementation 'io.finnhub:kotlin-client:2.0.20'
-//	implementation "com.deepl.api:deepl-java:1.9.0"
+	implementation 'com.google.genai:google-genai:1.0.0'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
