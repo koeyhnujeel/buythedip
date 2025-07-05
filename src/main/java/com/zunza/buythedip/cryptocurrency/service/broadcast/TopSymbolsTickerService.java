@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TopTradingBroadcastService {
+public class TopSymbolsTickerService {
 
 	private final CryptocurrencyRepository cryptocurrencyRepository;
 	private final RedisMessagePublisher redisMessagePublisher;
@@ -33,7 +33,7 @@ public class TopTradingBroadcastService {
 
 	private static final String OPEN_PRICE_KEY_SUFFIX = ":OPENPRICE";
 
-	public void broadcastTopTradingVolumeRanking(Set<ZSetOperations.TypedTuple<Object>> TopNVolumeSet) {
+	public void publishTopVolumeForSymbols(Set<ZSetOperations.TypedTuple<Object>> TopNVolumeSet) {
 		try {
 			Map<String, CryptoDataWithLogoDto> cryptoMap = cryptocurrencyRepository.findAllWithLogo()
 				.stream()
@@ -63,7 +63,7 @@ public class TopTradingBroadcastService {
 	}
 
 	@RabbitListener(queues = RabbitMQConstants.TOP_VOLUME_TICKER_BROADCAST_QUEUE)
-	public void broadcastTopTradingVolumeTickers(TradeDto tradeDto) {
+	public void publishTopTickerForSymbol(TradeDto tradeDto) {
 		try {
 			String symbol = tradeDto.getSymbol();
 
