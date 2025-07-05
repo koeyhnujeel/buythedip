@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SymbolTickerBroadcastService {
+public class SingleSymbolTickerService {
 
 	private final RedisMessagePublisher redisMessagePublisher;
 	private final RedisTemplate<String, Object> redisTemplate;
@@ -26,7 +26,7 @@ public class SymbolTickerBroadcastService {
 
 
 	@RabbitListener(queues = RabbitMQConstants.SYMBOL_TICKER_BROADCAST_QUEUE)
-	public void broadcastSymbolTicker(TradeDto tradeDto) {
+	public void publishTickerForSymbol(TradeDto tradeDto) {
 		try {
 			String symbol = tradeDto.getSymbol();
 
