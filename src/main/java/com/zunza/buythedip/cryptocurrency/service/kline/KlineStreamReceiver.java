@@ -1,4 +1,4 @@
-package com.zunza.buythedip.cryptocurrency.service.broadcast;
+package com.zunza.buythedip.cryptocurrency.service.kline;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
@@ -6,6 +6,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zunza.buythedip.cryptocurrency.service.AbstractBinanceStreamReceiver;
 
 import lombok.extern.slf4j.Slf4j;
 

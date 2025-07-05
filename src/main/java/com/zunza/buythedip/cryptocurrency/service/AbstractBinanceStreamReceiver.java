@@ -1,4 +1,4 @@
-package com.zunza.buythedip.cryptocurrency.service.broadcast;
+package com.zunza.buythedip.cryptocurrency.service;
 
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;

@@ -1,4 +1,4 @@
-package com.zunza.buythedip.infrastructure.redis;
+package com.zunza.buythedip.cryptocurrency.service;
 
 import java.util.Set;
 

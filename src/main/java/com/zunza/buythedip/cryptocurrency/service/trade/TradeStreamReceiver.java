@@ -1,4 +1,4 @@
-package com.zunza.buythedip.cryptocurrency.service.broadcast;
+package com.zunza.buythedip.cryptocurrency.service.trade;
 
 import java.util.List;
 
@@ -13,6 +13,7 @@ import com.zunza.buythedip.cryptocurrency.dto.binance.StreamDto;
 import com.zunza.buythedip.cryptocurrency.entity.Cryptocurrency;
 import com.zunza.buythedip.cryptocurrency.handler.BinanceMessageRouter;
 import com.zunza.buythedip.cryptocurrency.repository.CryptocurrencyRepository;
+import com.zunza.buythedip.cryptocurrency.service.AbstractBinanceStreamReceiver;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

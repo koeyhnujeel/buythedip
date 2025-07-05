@@ -1,4 +1,4 @@
-package com.zunza.buythedip.cryptocurrency.service.broadcast;
+package com.zunza.buythedip.cryptocurrency.service.trade;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.data.redis.core.RedisTemplate;

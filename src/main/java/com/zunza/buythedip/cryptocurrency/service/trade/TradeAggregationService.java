@@ -1,4 +1,4 @@
-package com.zunza.buythedip.cryptocurrency.service;
+package com.zunza.buythedip.cryptocurrency.service.trade;
 
 
 import java.time.Duration;
