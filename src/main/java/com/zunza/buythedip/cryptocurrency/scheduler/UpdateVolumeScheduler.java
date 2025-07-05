@@ -13,7 +13,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.zunza.buythedip.cryptocurrency.service.broadcast.TopTradingBroadcastService;
+import com.zunza.buythedip.cryptocurrency.service.broadcast.TopSymbolsTickerService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UpdateVolumeScheduler {
 
 	private final RedisTemplate<String, Object> redisTemplate;
-	private final TopTradingBroadcastService topTradingBroadcastService;
+	private final TopSymbolsTickerService topSymbolsTickerService;
 
 	private static final String MINUTE_BUCKET_KEY_PREFIX = "tv:";
 	private static final String AGGREGATED_VOLUME_KEY = MINUTE_BUCKET_KEY_PREFIX + "30m_aggregated";
@@ -43,7 +43,7 @@ public class UpdateVolumeScheduler {
 			return;
 		}
 
-		topTradingBroadcastService.broadcastTopTradingVolumeRanking(topNVolumeSet);
+		topSymbolsTickerService.publishTopVolumeForSymbols(topNVolumeSet);
 		cacheTopVolume(topNVolumeSet);
 	}
 
