@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,34 +14,32 @@ import com.zunza.buythedip.cryptocurrency.entity.Cryptocurrency;
 import com.zunza.buythedip.cryptocurrency.handler.BinanceMessageRouter;
 import com.zunza.buythedip.cryptocurrency.repository.CryptocurrencyRepository;
 
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class TradeStreamReceiver extends TextWebSocketHandler {
+public class TradeStreamReceiver extends AbstractBinanceStreamReceiver {
 
 	private final CryptocurrencyRepository cryptoCurrencyRepository;
 	private final BinanceMessageRouter binanceMessageRouter;
-	private final WebSocketClient webSocketClient;
-	private final ObjectMapper objectMapper;
 
-	public static final String URL = "wss://data-stream.binance.vision/stream";
 	public static final String STREAM_SUFFIX = "usdt@trade";
 
-	@PostConstruct
+	public TradeStreamReceiver(
+		WebSocketClient webSocketClient,
+		ObjectMapper objectMapper,
+		CryptocurrencyRepository cryptoCurrencyRepository,
+		BinanceMessageRouter binanceMessageRouter
+	) {
+		super(webSocketClient, objectMapper);
+		this.cryptoCurrencyRepository = cryptoCurrencyRepository;
+		this.binanceMessageRouter = binanceMessageRouter;
+	}
+
+	@Override
 	public void connect() {
-		try {
-			log.info("start connecting...");
-			webSocketClient.execute(this, URL).get();
-			log.info("Binance WebSocket Streams Connected");
-		} catch (Exception e) {
-			log.error("Binance WebSocket Streams Connect failed");
-			log.error(e.getMessage());
-		}
+		super.connect();
 	}
 
 	@Override
