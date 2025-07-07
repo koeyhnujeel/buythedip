@@ -17,11 +17,9 @@ public class TopVolumeHandler implements RedisMessageHandler {
 	private final ObjectMapper objectMapper;
 	private final SimpMessageSendingOperations messagingTemplate;
 
-	private static final String TOP_N_VOLUME_DESTINATION = "/topic/crypto/volume/top";
-
 	@Override
 	public void handle(String message) throws JsonProcessingException {
 		List list = objectMapper.readValue(message, List.class);
-		messagingTemplate.convertAndSend(TOP_N_VOLUME_DESTINATION, list);
+		messagingTemplate.convertAndSend(Destination.TOP_VOLUME_DESTINATION.getDestination(), list);
 	}
 }

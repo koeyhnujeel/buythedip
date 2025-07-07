@@ -11,17 +11,15 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class SymbolTickerHandler implements RedisMessageHandler{
+public class SymbolTickerHandler implements RedisMessageHandler {
 
 	private final ObjectMapper objectMapper;
 	private final SimpMessageSendingOperations messagingTemplate;
 
-	private static final String SYMBOL_TICKER_DESTINATION_PREFIX = "/topic/crypto/symbol/";
-
 	@Override
 	public void handle(String message) throws JsonProcessingException {
 		SymbolTickerDto symbolTickerDto = objectMapper.readValue(message, SymbolTickerDto.class);
-		String destination = SYMBOL_TICKER_DESTINATION_PREFIX + symbolTickerDto.getSymbol();
+		String destination = Destination.SYMBOL_TICKER_DESTINATION_PREFIX.getDestination() + symbolTickerDto.getSymbol();
 		messagingTemplate.convertAndSend(destination, symbolTickerDto);
 	}
 }

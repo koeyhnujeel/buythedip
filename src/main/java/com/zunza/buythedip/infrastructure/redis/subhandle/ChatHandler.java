@@ -16,11 +16,9 @@ public class ChatHandler implements RedisMessageHandler {
 	private final ObjectMapper objectMapper;
 	private final SimpMessageSendingOperations messagingTemplate;
 
-	private static final String CHAT_DESTINATION = "/topic/chat/room/public";
-
 	@Override
 	public void handle(String message) throws JsonProcessingException {
 		ChatMessageDto chatMessageDto = objectMapper.readValue(message, ChatMessageDto.class);
-		messagingTemplate.convertAndSend(CHAT_DESTINATION, chatMessageDto);
+		messagingTemplate.convertAndSend(Destination.CHAT_DESTINATION.getDestination(), chatMessageDto);
 	}
 }
