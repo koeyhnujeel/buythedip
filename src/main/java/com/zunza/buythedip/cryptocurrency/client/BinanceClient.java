@@ -1,15 +1,19 @@
 package com.zunza.buythedip.cryptocurrency.client;
 
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zunza.buythedip.cryptocurrency.dto.binance.ExchangeInfoDto;
+import com.zunza.buythedip.cryptocurrency.dto.binance.KlineDto;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -65,6 +69,22 @@ public class BinanceClient {
 			.bodyToMono(String.class)
 			.map(res -> parseOpenPrice(res, symbol))
 			.onErrorReturn(Double.NaN);
+	}
+
+	public Mono<List<KlineDto>> getKlines(String symbol, String interval) {
+		return webClient.get()
+			.uri(uriBuilder -> uriBuilder
+				.path("/api/v3/klines")
+				.queryParam("symbol", symbol)
+				.queryParam("interval", interval)
+				.queryParam("limit", 100)
+				.build()
+			)
+			.retrieve()
+			.bodyToMono(new ParameterizedTypeReference<List<List<Object>>>() {})
+			.map(res -> res.stream()
+				.map(KlineDto::createKlineDtoForInit)
+				.toList());
 	}
 
 	private Double parseOpenPrice(String res, String symbol) {
