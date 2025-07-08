@@ -9,13 +9,13 @@ import org.springframework.web.socket.client.WebSocketClient;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zunza.buythedip.cryptocurrency.dto.SubDto;
 import com.zunza.buythedip.cryptocurrency.dto.binance.StreamDto;
 import com.zunza.buythedip.cryptocurrency.entity.Cryptocurrency;
 import com.zunza.buythedip.cryptocurrency.handler.BinanceMessageRouter;
 import com.zunza.buythedip.cryptocurrency.repository.CryptocurrencyRepository;
 import com.zunza.buythedip.cryptocurrency.service.AbstractBinanceStreamReceiver;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -25,6 +25,7 @@ public class TradeStreamReceiver extends AbstractBinanceStreamReceiver {
 	private final CryptocurrencyRepository cryptoCurrencyRepository;
 	private final BinanceMessageRouter binanceMessageRouter;
 
+	public static final String URL = "wss://data-stream.binance.vision/stream";
 	public static final String STREAM_SUFFIX = "usdt@trade";
 
 	public TradeStreamReceiver(
@@ -33,7 +34,7 @@ public class TradeStreamReceiver extends AbstractBinanceStreamReceiver {
 		CryptocurrencyRepository cryptoCurrencyRepository,
 		BinanceMessageRouter binanceMessageRouter
 	) {
-		super(webSocketClient, objectMapper);
+		super(webSocketClient, objectMapper, URL);
 		this.cryptoCurrencyRepository = cryptoCurrencyRepository;
 		this.binanceMessageRouter = binanceMessageRouter;
 	}
@@ -50,7 +51,8 @@ public class TradeStreamReceiver extends AbstractBinanceStreamReceiver {
 			.map(crypto -> crypto.getSymbol().toLowerCase() + STREAM_SUFFIX)
 			.toList();
 
-		SubDto subscribe = new SubDto("SUBSCRIBE", symbols);
+
+		SubDto subscribe = new SubDto("SUBSCRIBE", symbols, session.getId());
 		String value = objectMapper.writeValueAsString(subscribe);
 
 		session.sendMessage(new TextMessage(value));
@@ -66,19 +68,5 @@ public class TradeStreamReceiver extends AbstractBinanceStreamReceiver {
 		}
 
 		binanceMessageRouter.route(streamDto.getTradeDto());
-	}
-
-	@Getter
-	public static class SubDto {
-		private String method;
-		private List<String> params;
-
-		public SubDto() {
-		}
-
-		public SubDto(String method, List<String> params) {
-			this.method = method;
-			this.params = params;
-		}
 	}
 }
