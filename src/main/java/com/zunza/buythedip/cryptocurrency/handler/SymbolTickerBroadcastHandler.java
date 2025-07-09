@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.zunza.buythedip.constant.RabbitMQConstants;
 import com.zunza.buythedip.infrastructure.messaging.RabbitMQService;
 import com.zunza.buythedip.cryptocurrency.dto.binance.TradeDto;
+import com.zunza.buythedip.infrastructure.redis.subhandle.Destination;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,6 @@ public class SymbolTickerBroadcastHandler implements PurposeHandler {
 	private final RedisTemplate<String, Object> redisTemplate;
 
 	private static final String SUBSCRIBER_COUNT_KEY_PREFIX = "subscribers:count:";
-	private static final String DESTINATION_PREFIX = "/topic/crypto/symbol/";
 
 	@Override
 	public void handle(TradeDto tradeDto) {
@@ -45,6 +45,6 @@ public class SymbolTickerBroadcastHandler implements PurposeHandler {
 	}
 
 	private String getCountKey(String baseSymbol) {
-		return SUBSCRIBER_COUNT_KEY_PREFIX + DESTINATION_PREFIX + baseSymbol;
+		return SUBSCRIBER_COUNT_KEY_PREFIX + Destination.SYMBOL_TICKER_DESTINATION_PREFIX.getDestination() + baseSymbol;
 	}
 }
