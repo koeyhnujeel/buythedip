@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.zunza.buythedip.constant.ChannelNames;
 import com.zunza.buythedip.infrastructure.redis.subhandle.ChatHandler;
 import com.zunza.buythedip.infrastructure.redis.subhandle.RedisMessageHandler;
+import com.zunza.buythedip.infrastructure.redis.subhandle.SymbolKlineHandler;
 import com.zunza.buythedip.infrastructure.redis.subhandle.SymbolTickerHandler;
 import com.zunza.buythedip.infrastructure.redis.subhandle.TopVolumeHandler;
 import com.zunza.buythedip.infrastructure.redis.subhandle.TopVolumePriceHandler;
@@ -23,13 +24,15 @@ public class RedisMessageSubscriber {
 		ChatHandler chatHandler,
 		TopVolumeHandler topVolumeHandler,
 		TopVolumePriceHandler topVolumePriceHandler,
-		SymbolTickerHandler symbolTickerHandler
+		SymbolTickerHandler symbolTickerHandler,
+		SymbolKlineHandler symbolKlineHandler
 	) {
 		this.handleMap = Map.of(
 			ChannelNames.CHAT_MESSAGE_TOPIC, chatHandler,
 			ChannelNames.TOP_VOLUME_TOPIC, topVolumeHandler,
 			ChannelNames.TOP_PRICE_TICK_TOPIC, topVolumePriceHandler,
-			ChannelNames.SYMBOL_TICKER_TOPIC, symbolTickerHandler
+			ChannelNames.SYMBOL_TICKER_TOPIC, symbolTickerHandler,
+			ChannelNames.SYMBOL_KLINE_TOPIC, symbolKlineHandler
 		);
 	}
 
