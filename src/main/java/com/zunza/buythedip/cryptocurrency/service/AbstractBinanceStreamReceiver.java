@@ -15,8 +15,6 @@ public abstract class AbstractBinanceStreamReceiver extends TextWebSocketHandler
 	protected final ObjectMapper objectMapper;
 	protected String url;
 
-	protected static final String URL = "wss://data-stream.binance.vision/stream";
-
 	protected AbstractBinanceStreamReceiver(
 		WebSocketClient webSocketClient,
 		ObjectMapper objectMapper,
