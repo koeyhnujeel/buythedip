@@ -25,7 +25,7 @@ public class BinanceClient {
 	private final WebClient webClient;
 	private final ObjectMapper objectMapper;
 
-	private static final String URL = "https://api.binance.com";
+	private static final String URL = "https://data-api.binance.vision";
 
 	public BinanceClient(
 		WebClient.Builder webClientBuilder,
@@ -52,16 +52,12 @@ public class BinanceClient {
 			.block();
 	}
 
-	public Mono<Double> getDailyOpenPrice(String symbol, LocalDate date) {
-		Instant startInstant = date.atStartOfDay(ZoneOffset.UTC).toInstant();
-		long startTime = startInstant.toEpochMilli();
-
+	public Mono<Double> getDailyOpenPrice(String symbol) {
 		return webClient.get()
 			.uri(uriBuilder -> uriBuilder
 				.path("/api/v3/klines")
 				.queryParam("symbol", symbol)
 				.queryParam("interval", "1d")
-				.queryParam("startTime", startTime)
 				.queryParam("limit", 1)
 				.build()
 			)

@@ -31,11 +31,10 @@ public class OpenPriceScheduler {
 	@Scheduled(cron = "10 0 0 * * *", zone = "UTC")
 	public void fetchAndCacheAllSymbolsOpenPrice() {
 		List<Cryptocurrency> cryptocurrencies = cryptoCurrencyRepository.findAll();
-		LocalDate now = LocalDate.now();
 
 		Flux.fromIterable(cryptocurrencies)
 			.delayElements(Duration.ofMillis(100))
-			.flatMap(cryptocurrency -> binanceClient.getDailyOpenPrice(cryptocurrency.getSymbol() + SYMBOL_SUFFIX, now)
+			.flatMap(cryptocurrency -> binanceClient.getDailyOpenPrice(cryptocurrency.getSymbol() + SYMBOL_SUFFIX)
 				.doOnNext(openPrice -> {
 					openPriceCacheRepository.save(cryptocurrency.getSymbol() + SYMBOL_SUFFIX + KEY_SUFFIX_OPEN_PRICE, openPrice);
 					log.info("Successfully cached symbol: {} / open price: {}", cryptocurrency.getSymbol() + SYMBOL_SUFFIX, openPrice);
