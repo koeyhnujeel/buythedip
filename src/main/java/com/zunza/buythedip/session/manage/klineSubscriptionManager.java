@@ -1,8 +1,6 @@
 package com.zunza.buythedip.session.manage;
 
 import java.io.IOException;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -28,38 +26,49 @@ public class klineSubscriptionManager extends AbstractSubscriptionManager {
 	}
 
 	@Override
-	public void handleDisconnect(String sessionId) throws IOException {
-		Set<Object> destinations = getSubscribedDestinationsForSession(sessionId);
-		if (destinations == null || destinations.isEmpty()) {
-			return;
+	public void handleSubscribe(String sessionId, String subscriptionId, String destination) throws IOException {
+		String countKey = getCountKey(destination);
+		Long subscriberCount = redisTemplate.opsForValue().increment(countKey);
+		log.info("Subscribed to {} | Current subscribers: {}", destination, subscriberCount);
+
+		String sessionKey = getSessionKey(sessionId);
+		redisTemplate.opsForSet().add(sessionKey, destination);
+
+		String subDestinationKey = getSubDestinationKey(sessionId, subscriptionId);
+		redisTemplate.opsForValue().set(subDestinationKey, destination);
+
+		onFirstSubscriber(destination, subscriberCount);
+	}
+
+	@Override
+	public void handleUnSubscribe(String sessionId, String subscriptionId) throws IOException {
+		String subDestinationKey = getSubDestinationKey(sessionId, subscriptionId);
+		String destination = String.valueOf(redisTemplate.opsForValue().get(subDestinationKey));
+
+		String countKey = getCountKey(destination);
+		Long subscriberCount = redisTemplate.opsForValue().decrement(countKey);
+		log.info("Unsubscribed from {} | Current subscribers: {}", destination, subscriberCount);
+
+		String sessionKey = getSessionKey(sessionId);
+		redisTemplate.opsForSet().remove(sessionKey, destination);
+		redisTemplate.delete(subDestinationKey);
+
+		onLastSubscriber(destination, subscriberCount);
+	}
+
+	private void onFirstSubscriber(String destination, Long subscriberCount) throws IOException {
+		if (subscriberCount != null && subscriberCount == 1) {
+			SymbolInterval symbolInterval = extractSymbolAndInterval(destination);
+			klineStreamManager.subKlineForSymbol(symbolInterval.symbol, symbolInterval.interval);
 		}
-
-		Set<String> klineDestinations = destinations.stream()
-			.filter(des -> des != null && des.toString().startsWith(Destination.SYMBOL_KLINE_DESTINATION_PREFIX.getDestination()))
-			.map(String::valueOf)
-			.collect(Collectors.toSet());
-
-		decrementSubscriberCounts(klineDestinations);
-		log.info("[Kline] Cleaned up kline subscriptions for disconnected session: {}", sessionId);
-
-		cleanupAllSessionData(sessionId);
 	}
 
 	@Override
-	protected void onFirstSubscriber(String destination) throws IOException {
-		SymbolInterval symbolInterval = extractSymbolAndInterval(destination);
-		klineStreamManager.subKlineForSymbol(symbolInterval.symbol, symbolInterval.interval);
-	}
-
-	@Override
-	protected void onLastSubscriber(String destination) throws IOException {
-		SymbolInterval symbolInterval = extractSymbolAndInterval(destination);
-		klineStreamManager.unSubKlineForSymbol(symbolInterval.symbol, symbolInterval.interval);
-	}
-
-	@Override
-	protected boolean canHandle(String destination) {
-		return destination != null && destination.startsWith(Destination.SYMBOL_KLINE_DESTINATION_PREFIX.getDestination());
+	public void onLastSubscriber(String destination, Long subscriberCount) throws IOException {
+		if (subscriberCount != null && subscriberCount == 0) {
+			SymbolInterval symbolInterval = extractSymbolAndInterval(destination);
+			klineStreamManager.unSubKlineForSymbol(symbolInterval.symbol, symbolInterval.interval);
+		}
 	}
 
 	private SymbolInterval extractSymbolAndInterval(String destination) {
