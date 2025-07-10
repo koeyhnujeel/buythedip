@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.zunza.buythedip.cryptocurrency.entity.Cryptocurrency;
 import com.zunza.buythedip.user.entity.User;
 
 import jakarta.persistence.CascadeType;
@@ -23,6 +24,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -44,6 +46,10 @@ public class Post {
 	private String content;
 
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "cryptocurrency_id", nullable = false)
+	private Cryptocurrency cryptocurrency;
+
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User author;
 
@@ -61,4 +67,21 @@ public class Post {
 
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
+
+	@Builder
+	private Post(String title, String content, Cryptocurrency cryptocurrency, User author) {
+		this.title = title;
+		this.content = content;
+		this.cryptocurrency = cryptocurrency;
+		this.author = author;
+	}
+
+	public static Post of(String title, String content, Cryptocurrency cryptocurrency, User author) {
+		return Post.builder()
+			.title(title)
+			.content(content)
+			.cryptocurrency(cryptocurrency)
+			.author(author)
+			.build();
+	}
 }
