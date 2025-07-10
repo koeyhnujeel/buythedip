@@ -23,14 +23,14 @@ public class CryptocurrencyController {
 
 	private final CryptocurrencyService cryptocurrencyService;
 
-	@GetMapping("/api/crypto/{cryptocurrencyId}/info")
+	@GetMapping("/api/cryptocurrencies/{cryptocurrencyId}/info")
 	public ResponseEntity<CryptoInfoDto> getCryptoInfo(
 		@PathVariable Long cryptocurrencyId
 	) {
 		return ResponseEntity.ok(cryptocurrencyService.getInfo(cryptocurrencyId));
 	}
 
-	@GetMapping("/api/crypto/volume/top")
+	@GetMapping("/api/cryptocurrencies/volume/top")
 	public ResponseEntity<List<RankingDto>> getTopVolumeRanking() {
 		return ResponseEntity.ok(cryptocurrencyService.getTopVolume());
 	}
