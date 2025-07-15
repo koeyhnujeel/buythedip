@@ -5,7 +5,12 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class CreatePostDto {
+public class PostResponseDto {
+	private Long postId;
 	private String title;
 	private String content;
+	private int viewCount;
+	private long commentCount;
+	private long likeCount;
+	private boolean isLiked;
 }

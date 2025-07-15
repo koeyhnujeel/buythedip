@@ -1,8 +1,13 @@
 package com.zunza.buythedip.community.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
+import com.zunza.buythedip.community.constant.PostSortType;
 import com.zunza.buythedip.community.dto.CreatePostDto;
+import com.zunza.buythedip.community.dto.PostCursorDto;
+import com.zunza.buythedip.community.dto.PostResponseDto;
 import com.zunza.buythedip.community.entity.Post;
 import com.zunza.buythedip.community.repository.PostRepository;
 import com.zunza.buythedip.cryptocurrency.entity.Cryptocurrency;
@@ -31,5 +36,9 @@ public class PostService {
 
 		Post post = Post.of(createPostDto.getTitle(), createPostDto.getContent(), cryptocurrency, user);
 		postRepository.save(post);
+	}
+
+	public List<PostResponseDto> getPostsByCursor(Long userId, Long cryptoId, PostSortType sort, PostCursorDto cursor) {
+		return postRepository.findPostsByCursor(userId, cryptoId, sort, cursor);
 	}
 }

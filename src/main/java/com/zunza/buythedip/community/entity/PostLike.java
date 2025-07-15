@@ -43,4 +43,9 @@ public class PostLike {
 
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
+
+	public PostLike(Post post, User user) {
+		this.post = post;
+		this.user = user;
+	}
 }
