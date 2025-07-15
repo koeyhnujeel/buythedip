@@ -84,4 +84,24 @@ public class Post {
 			.author(author)
 			.build();
 	}
+
+	private Post(String title, String content, Cryptocurrency cryptocurrency, User author, int viewCount, LocalDateTime createdAt) {
+		this.title = title;
+		this.content = content;
+		this.cryptocurrency = cryptocurrency;
+		this.author = author;
+		this.viewCount = viewCount;
+		this.createdAt = createdAt;
+	}
+
+	public static Post createTestData(String title, String content, Cryptocurrency cryptocurrency, User author, int viewCount, LocalDateTime createdAt) {
+		return new Post(
+			title,
+			content,
+			cryptocurrency,
+			author,
+			viewCount,
+			createdAt
+		);
+	}
 }
