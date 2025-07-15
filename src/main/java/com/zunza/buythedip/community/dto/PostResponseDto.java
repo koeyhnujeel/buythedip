@@ -1,5 +1,7 @@
 package com.zunza.buythedip.community.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,4 +15,5 @@ public class PostResponseDto {
 	private long commentCount;
 	private long likeCount;
 	private boolean isLiked;
+	private LocalDateTime createdAt;
 }

@@ -43,7 +43,8 @@ public class QuerydslPostRepositoryImpl implements QuerydslPostRepository {
 				postLike.id.countDistinct(),
 				Expressions.cases()
 					.when(userLike.id.max().isNotNull()).then(true)
-					.otherwise(false)
+					.otherwise(false),
+				post.createdAt
 			))
 			.from(post)
 			.leftJoin(post.comments, comment)
