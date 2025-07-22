@@ -11,6 +11,7 @@ import com.zunza.buythedip.community.dto.PostResponseDto;
 import com.zunza.buythedip.community.entity.QComment;
 import com.zunza.buythedip.community.entity.QPost;
 import com.zunza.buythedip.community.entity.QPostLike;
+import com.zunza.buythedip.user.entity.QUser;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Repository;
 public class QuerydslPostRepositoryImpl implements QuerydslPostRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
+	private final QUser user = QUser.user;
 	private final QPost post = QPost.post;
 	private final QComment comment = QComment.comment;
 	private final QPostLike postLike = QPostLike.postLike;
@@ -35,6 +37,7 @@ public class QuerydslPostRepositoryImpl implements QuerydslPostRepository {
 		return jpaQueryFactory
 			.select(Projections.constructor(
 				PostResponseDto.class,
+				post.author.nickname,
 				post.id,
 				post.title,
 				post.content,
@@ -47,6 +50,7 @@ public class QuerydslPostRepositoryImpl implements QuerydslPostRepository {
 				post.createdAt
 			))
 			.from(post)
+			.leftJoin(post.author, user)
 			.leftJoin(post.comments, comment)
 			.leftJoin(post.likes, postLike)
 			.leftJoin(post.likes, userLike).on(userId == null ? Expressions.FALSE : userLike.user.id.eq(userId))
@@ -54,11 +58,38 @@ public class QuerydslPostRepositoryImpl implements QuerydslPostRepository {
 				post.cryptocurrency.id.eq(cryptoId),
 				getWhereCondition(sort, cursor)
 			)
-			.groupBy(post.id, post.title, post.content, post.viewCount, post.createdAt)
+			.groupBy(post.author.nickname, post.id, post.title, post.content, post.viewCount, post.createdAt)
 			.having(getHavingCondition(sort, cursor))
 			.orderBy(getOrderSpecifiers(sort))
 			.limit(LIMIT)
 			.fetch();
+	}
+
+	@Override
+	public PostResponseDto findPostWithCountsById(Long userId, Long postId) {
+		return jpaQueryFactory
+			.select(Projections.constructor(
+				PostResponseDto.class,
+				post.author.nickname,
+				post.id,
+				post.title,
+				post.content,
+				post.viewCount,
+				comment.id.countDistinct(),
+				postLike.id.countDistinct(),
+				Expressions.cases()
+					.when(userLike.id.max().isNotNull()).then(true)
+					.otherwise(false),
+				post.createdAt
+			))
+			.from(post)
+			.leftJoin(post.author, user)
+			.leftJoin(post.comments, comment)
+			.leftJoin(post.likes, postLike)
+			.leftJoin(post.likes, userLike).on(userId == null ? Expressions.FALSE : userLike.user.id.eq(userId))
+			.where(post.id.eq(postId))
+			.groupBy(post.author.nickname, post.id, post.title, post.content, post.viewCount, post.createdAt)
+			.fetchOne();
 	}
 
 	private BooleanExpression getWhereCondition(PostSortType sort, PostCursorDto cursor) {

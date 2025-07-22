@@ -8,4 +8,6 @@ import com.zunza.buythedip.community.dto.PostResponseDto;
 
 public interface QuerydslPostRepository {
 	List<PostResponseDto> findPostsByCursor(Long userId, Long cryptoId, PostSortType sort, PostCursorDto cursor);
+
+	PostResponseDto findPostWithCountsById(Long userId, Long postId);
 }
