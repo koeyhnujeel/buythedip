@@ -5,7 +5,11 @@ import java.io.IOException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.zunza.buythedip.cryptocurrency.service.kline.KlineStreamManager;
+import com.zunza.buythedip.constant.ChannelNames;
+import com.zunza.buythedip.cryptocurrency.dto.KlineControlMessage;
+import com.zunza.buythedip.cryptocurrency.service.RedisLeaderElection;
+import com.zunza.buythedip.cryptocurrency.stream.KlineStreamManager;
+import com.zunza.buythedip.infrastructure.redis.RedisMessagePublisher;
 import com.zunza.buythedip.infrastructure.redis.subhandle.Destination;
 
 import lombok.AllArgsConstructor;
@@ -16,13 +20,19 @@ import lombok.extern.slf4j.Slf4j;
 public class klineSubscriptionManager extends AbstractSubscriptionManager {
 
 	private final KlineStreamManager klineStreamManager;
+	private final RedisLeaderElection redisLeaderElection;
+	private final RedisMessagePublisher redisMessagePublisher;
 
 	public klineSubscriptionManager(
 		RedisTemplate<String, Object> redisTemplate,
-		KlineStreamManager klineStreamManager
+		KlineStreamManager klineStreamManager,
+		RedisLeaderElection redisLeaderElection,
+		RedisMessagePublisher redisMessagePublisher
 	) {
 		super(redisTemplate);
 		this.klineStreamManager = klineStreamManager;
+		this.redisLeaderElection = redisLeaderElection;
+		this.redisMessagePublisher = redisMessagePublisher;
 	}
 
 	@Override
@@ -35,17 +45,41 @@ public class klineSubscriptionManager extends AbstractSubscriptionManager {
 
 	@Override
 	public void onFirstSubscriber(String destination, Long subscriberCount) throws IOException {
-		if (subscriberCount != null && subscriberCount == 1) {
-			SymbolInterval symbolInterval = extractSymbolAndInterval(destination);
+		if (subscriberCount == null || subscriberCount != 1) {
+			return;
+		}
+
+		SymbolInterval symbolInterval = extractSymbolAndInterval(destination);
+
+		if (redisLeaderElection.isLeader()) {
 			klineStreamManager.subKlineForSymbol(symbolInterval.symbol, symbolInterval.interval);
+		} else {
+			KlineControlMessage klineControlMessage = new KlineControlMessage(
+				KlineControlMessage.ActionType.SUBSCRIBE,
+				symbolInterval.symbol,
+				symbolInterval.interval);
+
+			redisMessagePublisher.publishMessage(ChannelNames.KLINE_CONTROL_TOPIC, klineControlMessage);
 		}
 	}
 
 	@Override
 	public void onLastSubscriber(String destination, Long subscriberCount) throws IOException {
-		if (subscriberCount != null && subscriberCount == 0) {
-			SymbolInterval symbolInterval = extractSymbolAndInterval(destination);
+		if (subscriberCount == null || subscriberCount != 0) {
+			return;
+		}
+
+		SymbolInterval symbolInterval = extractSymbolAndInterval(destination);
+
+		if (redisLeaderElection.isLeader()) {
 			klineStreamManager.unSubKlineForSymbol(symbolInterval.symbol, symbolInterval.interval);
+		} else {
+			KlineControlMessage klineControlMessage = new KlineControlMessage(
+				KlineControlMessage.ActionType.UNSUBSCRIBE,
+				symbolInterval.symbol,
+				symbolInterval.interval);
+
+			redisMessagePublisher.publishMessage(ChannelNames.KLINE_CONTROL_TOPIC, klineControlMessage);
 		}
 	}
 
