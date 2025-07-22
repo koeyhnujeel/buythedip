@@ -26,37 +26,15 @@ public class klineSubscriptionManager extends AbstractSubscriptionManager {
 	}
 
 	@Override
-	public void handleSubscribe(String sessionId, String subscriptionId, String destination) throws IOException {
-		String countKey = getCountKey(destination);
-		Long subscriberCount = redisTemplate.opsForValue().increment(countKey);
-		log.info("Subscribed to {} | Current subscribers: {}", destination, subscriberCount);
-
-		String sessionKey = getSessionKey(sessionId);
-		redisTemplate.opsForSet().add(sessionKey, destination);
-
-		String subDestinationKey = getSubDestinationKey(sessionId, subscriptionId);
-		redisTemplate.opsForValue().set(subDestinationKey, destination);
-
-		onFirstSubscriber(destination, subscriberCount);
-	}
-
-	@Override
-	public void handleUnSubscribe(String sessionId, String subscriptionId) throws IOException {
-		String subDestinationKey = getSubDestinationKey(sessionId, subscriptionId);
-		String destination = String.valueOf(redisTemplate.opsForValue().get(subDestinationKey));
-
-		String countKey = getCountKey(destination);
-		Long subscriberCount = redisTemplate.opsForValue().decrement(countKey);
-		log.info("Unsubscribed from {} | Current subscribers: {}", destination, subscriberCount);
-
-		String sessionKey = getSessionKey(sessionId);
-		redisTemplate.opsForSet().remove(sessionKey, destination);
-		redisTemplate.delete(subDestinationKey);
-
+	public void handleDisconnect(String sessionId, String destination) throws IOException {
+		Long subscriberCount = decrementSubscriberCounts(destination);
+		redisTemplate.opsForSet().remove(getSessionKey(sessionId), destination);
+		log.info("[Disconnected] Unsubscribed from {} | Current subscribers: {}", destination, subscriberCount);
 		onLastSubscriber(destination, subscriberCount);
 	}
 
-	private void onFirstSubscriber(String destination, Long subscriberCount) throws IOException {
+	@Override
+	public void onFirstSubscriber(String destination, Long subscriberCount) throws IOException {
 		if (subscriberCount != null && subscriberCount == 1) {
 			SymbolInterval symbolInterval = extractSymbolAndInterval(destination);
 			klineStreamManager.subKlineForSymbol(symbolInterval.symbol, symbolInterval.interval);

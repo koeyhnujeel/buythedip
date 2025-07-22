@@ -1,6 +1,8 @@
 package com.zunza.buythedip.session.manage;
 
 
+import java.io.IOException;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -15,5 +17,13 @@ public class TradeSubscriptionManager extends AbstractSubscriptionManager {
 	}
 
 	@Override
-	public void onLastSubscriber(String destination, Long subscriberCount) {}
+	public void handleDisconnect(String sessionId, String destination) {
+		Long subscriberCount = decrementSubscriberCounts(destination);
+		redisTemplate.opsForSet().remove(getSessionKey(sessionId), destination);
+		log.info("[Disconnected] Unsubscribed from {} | Current subscribers: {}", destination, subscriberCount);
+	}
+
+	@Override
+	public void onLastSubscriber(String destination, Long subscriberCount) {
+	}
 }
