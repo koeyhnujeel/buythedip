@@ -45,6 +45,11 @@ public class RedisListenerConfig {
 	}
 
 	@Bean
+	public ChannelTopic klineControlTopic() {
+		return new ChannelTopic(ChannelNames.KLINE_CONTROL_TOPIC);
+	}
+
+	@Bean
 	public MessageListenerAdapter listenerAdapter() {
 		return new MessageListenerAdapter(subscriber, "sendMessage");
 	}
@@ -58,6 +63,7 @@ public class RedisListenerConfig {
 		listenerContainer.addMessageListener(listenerAdapter(), topVolumeTopic());
 		listenerContainer.addMessageListener(listenerAdapter(), symbolTickerTopic());
 		listenerContainer.addMessageListener(listenerAdapter(), symbolKlineTopic());
+		listenerContainer.addMessageListener(listenerAdapter(), klineControlTopic());
 		return listenerContainer;
 	}
 }

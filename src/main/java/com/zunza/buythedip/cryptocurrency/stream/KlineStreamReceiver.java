@@ -1,48 +1,38 @@
 package com.zunza.buythedip.cryptocurrency.service.kline;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zunza.buythedip.constant.ChannelNames;
+import com.zunza.buythedip.cryptocurrency.dto.ReConnectionEvent;
 import com.zunza.buythedip.cryptocurrency.dto.binance.KlineDto;
-import com.zunza.buythedip.cryptocurrency.service.AbstractBinanceStreamReceiver;
+import com.zunza.buythedip.cryptocurrency.stream.CustomCloseStatus;
 import com.zunza.buythedip.infrastructure.redis.RedisMessagePublisher;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class KlineStreamReceiver extends AbstractBinanceStreamReceiver {
+@RequiredArgsConstructor
+public class KlineStreamReceiver extends TextWebSocketHandler {
 
+	private final ApplicationEventPublisher eventPublisher;
 	private final RedisMessagePublisher redisMessagePublisher;
 	private final KlineStreamManager klineStreamManager;
 	private final ObjectMapper objectMapper;
 
-	public static final String URL = "wss://data-stream.binance.vision/ws";
-
-	public KlineStreamReceiver(
-		RedisMessagePublisher redisMessagePublisher,
-		KlineStreamManager klineStreamManager,
-		WebSocketClient webSocketClient,
-		ObjectMapper objectMapper
-	) {
-		super(webSocketClient, objectMapper, URL);
-		this.klineStreamManager = klineStreamManager;
-		this.objectMapper = objectMapper;
-		this.redisMessagePublisher = redisMessagePublisher;
-	}
+	private static final String STREAM_NAME = "KLINE";
 
 	@Override
-	public void connect() {
-		super.connect();
-	}
-
-	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+	public void afterConnectionEstablished(WebSocketSession session) {
+		log.info("WebSocket session established successfully: {}", STREAM_NAME);
 		klineStreamManager.registerKlineSession(session);
 	}
 
@@ -56,5 +46,14 @@ public class KlineStreamReceiver extends AbstractBinanceStreamReceiver {
 
 		KlineDto klineDto = KlineDto.createKlineDtoForUpdate(jsonNode);
 		redisMessagePublisher.publishMessage(ChannelNames.SYMBOL_KLINE_TOPIC, klineDto);
+	}
+
+	@Override
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+		if (status.equalsCode(CustomCloseStatus.PLANNED_RECONNECTION)) {
+			return;
+		}
+
+		eventPublisher.publishEvent(new ReConnectionEvent(STREAM_NAME));
 	}
 }
