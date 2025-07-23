@@ -7,13 +7,11 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PostResponseDto {
-	private String nickname;
-	private Long postId;
-	private String title;
+public class ReplyDto {
+	private Long id;
+	private Long parentId;
+	private String author;
 	private String content;
-	private int viewCount;
-	private long commentCount;
 	private long likeCount;
 	private boolean isLiked;
 	private LocalDateTime createdAt;
