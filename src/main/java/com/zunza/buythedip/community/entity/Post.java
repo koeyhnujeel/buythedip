@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.zunza.buythedip.community.dto.ModifyPostRequestDto;
 import com.zunza.buythedip.cryptocurrency.entity.Cryptocurrency;
 import com.zunza.buythedip.user.entity.User;
 
@@ -83,6 +84,11 @@ public class Post {
 			.cryptocurrency(cryptocurrency)
 			.author(author)
 			.build();
+	}
+
+	public void modifyPost(ModifyPostRequestDto modifyPostRequestDto) {
+		this.title = (modifyPostRequestDto.getTitle() != null) ? modifyPostRequestDto.getTitle() : this.title;
+		this.content = (modifyPostRequestDto.getContent() != null) ? modifyPostRequestDto.getContent() : this.content;
 	}
 
 	private Post(String title, String content, Cryptocurrency cryptocurrency, User author, int viewCount, LocalDateTime createdAt) {

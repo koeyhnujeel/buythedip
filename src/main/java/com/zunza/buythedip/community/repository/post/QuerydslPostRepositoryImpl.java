@@ -1,4 +1,4 @@
-package com.zunza.buythedip.community.repository;
+package com.zunza.buythedip.community.repository.post;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -14,6 +14,8 @@ import com.zunza.buythedip.community.entity.QPostLike;
 import com.zunza.buythedip.user.entity.QUser;
 
 import java.util.List;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -66,7 +68,13 @@ public class QuerydslPostRepositoryImpl implements QuerydslPostRepository {
 	}
 
 	@Override
+	@Transactional
 	public PostResponseDto findPostWithCountsById(Long userId, Long postId) {
+		jpaQueryFactory.update(post)
+			.set(post.viewCount, post.viewCount.add(1))
+			.where(post.id.eq(postId))
+			.execute();
+
 		return jpaQueryFactory
 			.select(Projections.constructor(
 				PostResponseDto.class,

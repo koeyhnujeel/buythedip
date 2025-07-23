@@ -17,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -44,8 +45,16 @@ public class PostLike {
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
 
-	public PostLike(Post post, User user) {
+	@Builder
+	private PostLike(Post post, User user) {
 		this.post = post;
 		this.user = user;
+	}
+
+	public static PostLike of(Post post, User user) {
+		return PostLike.builder()
+			.post(post)
+			.user(user)
+			.build();
 	}
 }
