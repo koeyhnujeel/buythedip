@@ -1,4 +1,4 @@
-package com.zunza.buythedip.community.repository;
+package com.zunza.buythedip.community.repository.postlike;
 
 import java.util.Optional;
 
