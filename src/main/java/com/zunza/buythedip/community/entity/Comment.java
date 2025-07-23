@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.zunza.buythedip.community.dto.ModifyCommentRequestDto;
 import com.zunza.buythedip.user.entity.User;
 
 import jakarta.persistence.CascadeType;
@@ -23,6 +24,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -53,7 +55,7 @@ public class Comment {
 	private Comment parent;
 
 	@OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Comment> children = new ArrayList<>();
+	private List<Comment> replies = new ArrayList<>();
 
 	@OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<CommentLike> likes = new ArrayList<>();
@@ -63,4 +65,33 @@ public class Comment {
 
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
+
+	@Builder
+	private Comment(String content, User author, Post post, Comment parent) {
+		this.content = content;
+		this.author = author;
+		this.post = post;
+		this.parent = parent;
+	}
+
+	public static Comment createComment(String content, User author, Post post) {
+		return Comment.builder()
+			.content(content)
+			.author(author)
+			.post(post)
+			.build();
+	}
+
+	public static Comment createReply(String content, User author, Post post, Comment parent) {
+		return Comment.builder()
+			.content(content)
+			.author(author)
+			.post(post)
+			.parent(parent)
+			.build();
+	}
+
+	public void modifyContent(ModifyCommentRequestDto modifyCommentRequestDto) {
+		this.content = modifyCommentRequestDto.getContent();
+	}
 }
