@@ -15,7 +15,7 @@ class CustomUserDetails(
         get() = user.nickname
 
     override fun getAuthorities(): Collection<GrantedAuthority?>? {
-        return mutableListOf(GrantedAuthority { "ROLE_USER" })
+        return mutableListOf(GrantedAuthority { user.role.value })
     }
 
     override fun getPassword(): String? {
