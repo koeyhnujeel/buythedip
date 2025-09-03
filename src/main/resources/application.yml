@@ -1,0 +1,29 @@
+spring:
+  output:
+    ansi:
+      enabled: ALWAYS
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/buythedip
+    username: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      repositories:
+        enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  key: VmVyeVBvd2VyZnVsU2VjcmV0S2V5Rm9ySldUQXV0aGVudGljYXRpb25SZW1lbWJlcgfdasfsafsdfdsfaffdfadfafsadfasfsdafd==
+  access-token-expire-time: 1800000
+  refresh-token-expire-time: 604800000
