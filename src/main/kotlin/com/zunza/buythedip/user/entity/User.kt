@@ -1,7 +1,8 @@
 package com.zunza.buythedip.user.entity
 
+import com.zunza.buythedip.auth.oauth2.dto.OAuth2Response
 import com.zunza.buythedip.common.BaseEntity
-import com.zunza.buythedip.user.constant.OAuthProvider
+import com.zunza.buythedip.user.constant.OAuth2Provider
 import com.zunza.buythedip.user.constant.UserRole
 import com.zunza.buythedip.user.constant.UserType
 import jakarta.persistence.Column
@@ -22,7 +23,7 @@ class User(
     @Column(nullable = false, unique = true)
     val email: String,
 
-    @Column()
+    @Column
     val password: String? = null,
 
     @Column(nullable = false, unique = true)
@@ -36,23 +37,36 @@ class User(
     @Enumerated(EnumType.STRING)
     val type: UserType,
 
-    @Column()
+    @Column
     @Enumerated(EnumType.STRING)
-    val provider: OAuthProvider?
+    val provider: OAuth2Provider? = null,
+
+    @Column
+    val providerId: Long? = null
 ) : BaseEntity() {
     companion object {
-        fun of(
+        fun createNormalUser(
             email: String,
-            nickname: String,
             password: String,
-            type: UserType = UserType.NORMAL,
-            provider: OAuthProvider? = null
+            nickname: String
+        ): User {
+            return User(
+                email = email,
+                password = password,
+                nickname = nickname,
+                type = UserType.NORMAL
+            )
+        }
+
+        fun createSocialUser(
+            oAuth2Response: OAuth2Response,
+            randomNickname: String
         ) = User(
-            email = email,
-            nickname = nickname,
-            password = password,
-            type = type,
-            provider = provider
+            email = oAuth2Response.getEmail(),
+            nickname = randomNickname,
+            type = UserType.SOCIAL,
+            provider = oAuth2Response.getProvider(),
+            providerId = oAuth2Response.getProviderId()
         )
     }
 }
