@@ -42,7 +42,7 @@ class User(
     val provider: OAuth2Provider? = null,
 
     @Column
-    val providerId: Long? = null
+    val providerId: String? = null
 ) : BaseEntity() {
     companion object {
         fun createNormalUser(

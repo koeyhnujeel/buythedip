@@ -22,7 +22,7 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+//	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -35,6 +35,7 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	implementation("io.jsonwebtoken:jjwt:0.12.6") // JWT
 	implementation("io.github.oshai:kotlin-logging-jvm:7.0.3") // Logging
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-client") // oauth2
 //	implementation("io.github.openfeign.querydsl:querydsl-jpa:6.11") //OpenFeign QueryDSL
 //	ksp("io.github.openfeign.querydsl:querydsl-ksp-codegen:6.11")
 //	annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:6.11:jakarta")
