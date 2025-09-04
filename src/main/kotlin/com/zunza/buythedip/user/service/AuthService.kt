@@ -46,10 +46,10 @@ class AuthService(
 
     fun signup(signupRequest: SignupRequest) {
         val encodedPassword = passwordEncoder.encode(signupRequest.password)
-        userRepository.save(User.of(
+        userRepository.save(User.createNormalUser(
             signupRequest.email,
-            signupRequest.nickname,
-            encodedPassword
+            encodedPassword,
+            signupRequest.nickname
         ))
     }
 
