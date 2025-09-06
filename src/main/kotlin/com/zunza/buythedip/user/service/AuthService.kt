@@ -10,7 +10,9 @@ import com.zunza.buythedip.user.entity.User
 import com.zunza.buythedip.user.exception.LoginFailedException
 import com.zunza.buythedip.user.repository.RefreshJwtRepository
 import com.zunza.buythedip.user.repository.UserRepository
+import com.zunza.buythedip.watchlist.service.WatchlistService
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.transaction.Transactional
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -26,7 +28,8 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtTokenProvider: JwtTokenProvider,
     private val authenticationManager: AuthenticationManager,
-    private val refreshJwtRepository: RefreshJwtRepository
+    private val refreshJwtRepository: RefreshJwtRepository,
+    private val watchlistService: WatchlistService
 ) {
     fun isEmailAvailable(email: String): EmailAvailableResponse {
         validateEmailFormat(email)
@@ -44,13 +47,16 @@ class AuthService(
         }
     }
 
+    @Transactional
     fun signup(signupRequest: SignupRequest) {
         val encodedPassword = passwordEncoder.encode(signupRequest.password)
-        userRepository.save(User.createNormalUser(
+        val savedUser = userRepository.save(User.createNormalUser(
             signupRequest.email,
             encodedPassword,
             signupRequest.nickname
         ))
+
+        watchlistService.createDefaultWatchlist(savedUser)
     }
 
     fun login(loginRequest: LoginRequest): Map<String, String> {
