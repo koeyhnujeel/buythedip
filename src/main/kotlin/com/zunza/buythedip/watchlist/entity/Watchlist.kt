@@ -23,11 +23,14 @@ class Watchlist(
     val name: String,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    val user: User,
+    @JoinColumn(name = "user_id")
+    val user: User?,
 
     @Column(nullable = false)
     val isDefault: Boolean = false,
+
+    @Column(nullable = false)
+    val isSystem: Boolean = false,
 
     @Column(nullable = false)
     val sortOrder: Int = 0,

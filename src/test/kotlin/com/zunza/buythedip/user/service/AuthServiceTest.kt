@@ -9,6 +9,7 @@ import com.zunza.buythedip.user.entity.User
 import com.zunza.buythedip.user.exception.LoginFailedException
 import com.zunza.buythedip.user.repository.RefreshJwtRepository
 import com.zunza.buythedip.user.repository.UserRepository
+import com.zunza.buythedip.watchlist.service.WatchlistService
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -28,13 +29,15 @@ class AuthServiceTest : BehaviorSpec ({
     val jwtTokenProvider = mockk<JwtTokenProvider>()
     val authenticationManager = mockk<AuthenticationManager>()
     val refreshJwtRepository = mockk<RefreshJwtRepository>()
+    val watchlistService = mockk<WatchlistService>()
 
     val authService = AuthService(
         userRepository,
         passwordEncoder,
         jwtTokenProvider,
         authenticationManager,
-        refreshJwtRepository
+        refreshJwtRepository,
+        watchlistService
     )
 
     Given("회원가입 시 이메일, 닉네임 중복 체크할 때") {

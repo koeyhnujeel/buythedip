@@ -31,6 +31,6 @@ class Crypto(
         orphanRemoval = true,
         fetch = FetchType.LAZY
     )
-    @JoinColumn("metadata_id")
+    @JoinColumn(name = "metadata_id", nullable = false)
     val metadata: CryptoMetadata
 ) : BaseEntity()
