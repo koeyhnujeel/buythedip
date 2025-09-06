@@ -2,6 +2,7 @@ package com.zunza.buythedip.watchlist.service
 
 import com.zunza.buythedip.crypto.repository.CryptoRepository
 import com.zunza.buythedip.user.entity.User
+import com.zunza.buythedip.watchlist.dto.WatchlistResponse
 import com.zunza.buythedip.watchlist.entity.Watchlist
 import com.zunza.buythedip.watchlist.entity.WatchlistItem
 import com.zunza.buythedip.watchlist.repository.WatchlistRepository
@@ -28,5 +29,9 @@ class WatchlistService(
 
         watchlist.addItems(*watchlistItems)
         watchlistRepository.save(watchlist)
+    }
+
+    fun getWatchlist(userId: Long?): List<WatchlistResponse> {
+        return watchlistRepository.findWatchlist(userId)
     }
 }
