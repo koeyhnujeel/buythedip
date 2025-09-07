@@ -50,7 +50,7 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1") // kotest
 	testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
-	testImplementation("com.ninja-squad:springmockk:4.0.2") // Mockk
+	testImplementation("io.mockk:mockk:1.14.5") // Mockk
 	testImplementation("org.springframework.boot:spring-boot-testcontainers:3.5.4") // Test Containers
 	testImplementation("org.testcontainers:junit-jupiter:1.21.3")
 	testImplementation("org.testcontainers:mysql")

@@ -9,6 +9,7 @@ import com.zunza.buythedip.auth.oauth2.CustomOAuth2SuccessHandler
 import com.zunza.buythedip.auth.oauth2.CustomOAuth2UserService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -48,6 +49,9 @@ class SecurityConfig(
 
     }
 
+    /**
+     * TODO: AccessDenied Handler 추가하기
+     */
     @Bean
     fun securityFilterChain(
         http: HttpSecurity
@@ -71,6 +75,7 @@ class SecurityConfig(
 
             .authorizeHttpRequests { authorize ->
                 authorize
+                    .requestMatchers(HttpMethod.POST, "/api/watchlists/**").authenticated()
                     .anyRequest().permitAll()
             }
 

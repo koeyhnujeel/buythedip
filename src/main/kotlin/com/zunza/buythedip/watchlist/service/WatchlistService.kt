@@ -4,7 +4,7 @@ import com.zunza.buythedip.crypto.repository.CryptoRepository
 import com.zunza.buythedip.user.entity.User
 import com.zunza.buythedip.user.exception.UserNotFoundException
 import com.zunza.buythedip.user.repository.UserRepository
-import com.zunza.buythedip.watchlist.dto.CreateWatchlistRequest
+import com.zunza.buythedip.watchlist.dto.WatchlistCreateRequest
 import com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse
 import com.zunza.buythedip.watchlist.dto.WatchlistResponse
 import com.zunza.buythedip.watchlist.entity.Watchlist
@@ -51,11 +51,11 @@ class WatchlistService(
 
     fun createWatchlist(
         userId: Long,
-        createWatchlistRequest: CreateWatchlistRequest
+        watchlistCreateRequest: WatchlistCreateRequest
     ) {
         val user = userRepository.findByIdOrNull(userId)
             ?: throw UserNotFoundException(userId)
 
-        watchlistRepository.save(Watchlist.createOf(user, createWatchlistRequest))
+        watchlistRepository.save(Watchlist.createOf(user, watchlistCreateRequest))
     }
 }

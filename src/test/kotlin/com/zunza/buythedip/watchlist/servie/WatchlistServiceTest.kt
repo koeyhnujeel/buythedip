@@ -5,7 +5,7 @@ import com.zunza.buythedip.user.constant.UserType
 import com.zunza.buythedip.user.entity.User
 import com.zunza.buythedip.user.exception.UserNotFoundException
 import com.zunza.buythedip.user.repository.UserRepository
-import com.zunza.buythedip.watchlist.dto.CreateWatchlistRequest
+import com.zunza.buythedip.watchlist.dto.WatchlistCreateRequest
 import com.zunza.buythedip.watchlist.repository.WatchlistRepository
 import com.zunza.buythedip.watchlist.service.WatchlistService
 import io.kotest.assertions.throwables.shouldThrow
@@ -32,7 +32,7 @@ class WatchlistServiceTest() : BehaviorSpec({
             type = UserType.NORMAL
             )
 
-        val request = CreateWatchlistRequest("와치리스트", 1)
+        val request = WatchlistCreateRequest("와치리스트", 1)
 
         every { userRepository.findByIdOrNull(any()) } returns user
         every { watchlistRepository.save(any()) } returns mockk()
@@ -47,7 +47,7 @@ class WatchlistServiceTest() : BehaviorSpec({
     }
 
     Given("존재하지 않는 userId가 주어졌을 때") {
-        val request = CreateWatchlistRequest("와치리스트", 1)
+        val request = WatchlistCreateRequest("와치리스트", 1)
 
         every { userRepository.findByIdOrNull(any()) } returns null
 

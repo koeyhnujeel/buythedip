@@ -2,7 +2,7 @@ package com.zunza.buythedip.watchlist.entity
 
 import com.zunza.buythedip.common.BaseEntity
 import com.zunza.buythedip.user.entity.User
-import com.zunza.buythedip.watchlist.dto.CreateWatchlistRequest
+import com.zunza.buythedip.watchlist.dto.WatchlistCreateRequest
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -52,11 +52,11 @@ class Watchlist(
             )
         }
 
-        fun createOf(user: User, createWatchlistRequest: CreateWatchlistRequest): Watchlist {
+        fun createOf(user: User, watchlistCreateRequest: WatchlistCreateRequest): Watchlist {
            return Watchlist(
                user = user,
-               name = createWatchlistRequest.name,
-               sortOrder = createWatchlistRequest.sortOrder
+               name = watchlistCreateRequest.name,
+               sortOrder = watchlistCreateRequest.sortOrder
            )
         }
     }
