@@ -17,11 +17,11 @@ import jakarta.persistence.OneToOne
 class CryptoMetadata(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    val id: Long = 0,
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "crypto_id", nullable = false)
-    val crypto: Crypto,
+    @JoinColumn(name = "crypto_id")
+    val crypto: Crypto? = null,
 
     @Lob
     @Column(columnDefinition = "TEXT")

@@ -15,7 +15,7 @@ import jakarta.persistence.OneToOne
 class Crypto(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    val id: Long = 0,
 
     @Column(nullable = false, length = 20)
     val name: String,
@@ -27,10 +27,10 @@ class Crypto(
     val logo: String? = null,
 
     @OneToOne(
+        mappedBy = "crypto",
         cascade = [CascadeType.ALL],
         orphanRemoval = true,
         fetch = FetchType.LAZY
     )
-    @JoinColumn(name = "metadata_id", nullable = false)
-    val metadata: CryptoMetadata
+    val metadata: CryptoMetadata? = null
 ) : BaseEntity()
