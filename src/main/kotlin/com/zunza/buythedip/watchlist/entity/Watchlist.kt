@@ -53,6 +53,9 @@ class Watchlist(
     }
 
     fun addItems(vararg watchlistItems: WatchlistItem) {
-        this.watchlistItems.addAll(watchlistItems)
+        watchlistItems.forEach {
+            it.watchlist = this
+            this.watchlistItems.add(it)
+        }
     }
 }

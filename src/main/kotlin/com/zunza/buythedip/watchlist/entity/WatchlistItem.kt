@@ -19,7 +19,7 @@ class WatchlistItem(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "watchlist_id", nullable = false)
-    val watchlist: Watchlist,
+    var watchlist: Watchlist? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "crypto_id", nullable = false)
