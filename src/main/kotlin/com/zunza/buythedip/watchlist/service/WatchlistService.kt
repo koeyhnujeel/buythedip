@@ -2,11 +2,12 @@ package com.zunza.buythedip.watchlist.service
 
 import com.zunza.buythedip.crypto.repository.CryptoRepository
 import com.zunza.buythedip.user.entity.User
+import com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse
 import com.zunza.buythedip.watchlist.dto.WatchlistResponse
 import com.zunza.buythedip.watchlist.entity.Watchlist
 import com.zunza.buythedip.watchlist.entity.WatchlistItem
 import com.zunza.buythedip.watchlist.repository.WatchlistRepository
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 
 class WatchlistService(
     private val watchlistRepository: WatchlistRepository,
@@ -31,7 +32,13 @@ class WatchlistService(
         watchlistRepository.save(watchlist)
     }
 
+    @Transactional(readOnly = true)
     fun getWatchlist(userId: Long?): List<WatchlistResponse> {
         return watchlistRepository.findWatchlist(userId)
+    }
+
+    @Transactional(readOnly = true)
+    fun getWatchlistDetails(watchlistId: Long): List<WatchlistDetailsResponse> {
+        return watchlistRepository.findWatchlistDetailsById(watchlistId)
     }
 }
