@@ -2,16 +2,23 @@ package com.zunza.buythedip.watchlist.service
 
 import com.zunza.buythedip.crypto.repository.CryptoRepository
 import com.zunza.buythedip.user.entity.User
+import com.zunza.buythedip.user.exception.UserNotFoundException
+import com.zunza.buythedip.user.repository.UserRepository
+import com.zunza.buythedip.watchlist.dto.CreateWatchlistRequest
 import com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse
 import com.zunza.buythedip.watchlist.dto.WatchlistResponse
 import com.zunza.buythedip.watchlist.entity.Watchlist
 import com.zunza.buythedip.watchlist.entity.WatchlistItem
 import com.zunza.buythedip.watchlist.repository.WatchlistRepository
+import org.springframework.data.repository.findByIdOrNull
+import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+@Service
 class WatchlistService(
     private val watchlistRepository: WatchlistRepository,
-    private val cryptoRepository: CryptoRepository
+    private val cryptoRepository: CryptoRepository,
+    private val userRepository: UserRepository
 ) {
     /**
      * TODO: findBySymbols 캐시
@@ -40,5 +47,15 @@ class WatchlistService(
     @Transactional(readOnly = true)
     fun getWatchlistDetails(watchlistId: Long): List<WatchlistDetailsResponse> {
         return watchlistRepository.findWatchlistDetailsById(watchlistId)
+    }
+
+    fun createWatchlist(
+        userId: Long,
+        createWatchlistRequest: CreateWatchlistRequest
+    ) {
+        val user = userRepository.findByIdOrNull(userId)
+            ?: throw UserNotFoundException(userId)
+
+        watchlistRepository.save(Watchlist.createOf(user, createWatchlistRequest))
     }
 }
