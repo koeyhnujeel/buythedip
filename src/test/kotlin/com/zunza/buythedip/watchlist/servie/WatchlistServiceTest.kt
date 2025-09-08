@@ -1,16 +1,20 @@
 package com.zunza.buythedip.watchlist.servie
 
+import com.zunza.buythedip.crypto.entity.Crypto
 import com.zunza.buythedip.crypto.repository.CryptoRepository
 import com.zunza.buythedip.user.constant.UserType
 import com.zunza.buythedip.user.entity.User
 import com.zunza.buythedip.user.exception.UserNotFoundException
 import com.zunza.buythedip.user.repository.UserRepository
 import com.zunza.buythedip.watchlist.dto.WatchlistCreateRequest
+import com.zunza.buythedip.watchlist.dto.WatchlistItemAddRequest
+import com.zunza.buythedip.watchlist.entity.Watchlist
 import com.zunza.buythedip.watchlist.repository.WatchlistRepository
 import com.zunza.buythedip.watchlist.service.WatchlistService
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import org.springframework.data.repository.findByIdOrNull
@@ -56,6 +60,27 @@ class WatchlistServiceTest() : BehaviorSpec({
                 shouldThrow<UserNotFoundException> {
                     watchlistService.createWatchlist(999L, request)
                 }
+            }
+        }
+    }
+
+    Given("유효한 watchlistId, cryptoId가 주어졌을 때") {
+        val watchlistId = 1L
+        val request = WatchlistItemAddRequest(1L, 1)
+        val crypto = mockk<Crypto>()
+        val watchlist = mockk<Watchlist>()
+
+        every { cryptoRepository.findByIdOrNull(any()) } returns crypto
+        every { watchlistRepository.findByIdOrNull(any()) } returns watchlist
+        every { watchlist.addItems(any()) } returns Unit
+        every { watchlistRepository.save(any()) } returns mockk()
+        When("addItem()을 호출하면") {
+            watchlistService.addItem(watchlistId, request)
+
+            Then("watchlistRepository.save()가 호출된다") {
+                verify(exactly = 1) { watchlistRepository.findByIdOrNull(any()) }
+                verify(exactly = 1) { cryptoRepository.findByIdOrNull(any()) }
+                verify(exactly = 1) { watchlistRepository.save(any()) }
             }
         }
     }
