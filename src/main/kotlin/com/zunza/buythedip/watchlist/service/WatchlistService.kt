@@ -1,14 +1,17 @@
 package com.zunza.buythedip.watchlist.service
 
+import com.zunza.buythedip.crypto.exception.CryptoNotFoundException
 import com.zunza.buythedip.crypto.repository.CryptoRepository
 import com.zunza.buythedip.user.entity.User
 import com.zunza.buythedip.user.exception.UserNotFoundException
 import com.zunza.buythedip.user.repository.UserRepository
 import com.zunza.buythedip.watchlist.dto.WatchlistCreateRequest
 import com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse
+import com.zunza.buythedip.watchlist.dto.WatchlistItemAddRequest
 import com.zunza.buythedip.watchlist.dto.WatchlistResponse
 import com.zunza.buythedip.watchlist.entity.Watchlist
 import com.zunza.buythedip.watchlist.entity.WatchlistItem
+import com.zunza.buythedip.watchlist.exception.WatchlistNotFoundException
 import com.zunza.buythedip.watchlist.repository.WatchlistRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -32,7 +35,7 @@ class WatchlistService(
         val watchlist = Watchlist.createDefaultWatchlist(user)
         val watchlistItems = symbols.mapIndexed { index, symbol ->
             val crypto = requireNotNull(cryptoMap[symbol])
-            WatchlistItem.createOf(watchlist, crypto, index)
+            WatchlistItem.createOf(crypto, index)
         }.toTypedArray()
 
         watchlist.addItems(*watchlistItems)
@@ -57,5 +60,25 @@ class WatchlistService(
             ?: throw UserNotFoundException(userId)
 
         watchlistRepository.save(Watchlist.createOf(user, watchlistCreateRequest))
+    }
+
+    @Transactional
+    fun addItem(
+        watchlistId: Long,
+        watchlistItemAddRequest: WatchlistItemAddRequest
+    ) {
+        val cryptoId = watchlistItemAddRequest.cryptoId
+        val sortOrder = watchlistItemAddRequest.sortOrder
+
+        val crypto = cryptoRepository.findByIdOrNull(cryptoId)
+            ?: throw CryptoNotFoundException(cryptoId)
+
+        val watchlistItem = WatchlistItem.createOf(crypto, sortOrder)
+
+        val watchlist = watchlistRepository.findByIdOrNull(watchlistId)
+            ?: throw WatchlistNotFoundException(watchlistId)
+
+        watchlist.addItems(watchlistItem)
+        watchlistRepository.save(watchlist)
     }
 }
