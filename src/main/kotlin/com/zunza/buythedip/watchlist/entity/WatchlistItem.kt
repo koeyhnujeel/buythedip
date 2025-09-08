@@ -29,9 +29,8 @@ class WatchlistItem(
     val sortOrder: Int = 0
 ) : BaseEntity() {
     companion object{
-        fun createOf(watchlist: Watchlist, crypto: Crypto, sortOrder: Int): WatchlistItem {
+        fun createOf(crypto: Crypto, sortOrder: Int): WatchlistItem {
             return WatchlistItem(
-                watchlist = watchlist,
                 crypto = crypto,
                 sortOrder = sortOrder
             )

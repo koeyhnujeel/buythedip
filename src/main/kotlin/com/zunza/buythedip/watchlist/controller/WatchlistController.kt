@@ -3,6 +3,7 @@ package com.zunza.buythedip.watchlist.controller
 import com.zunza.buythedip.common.ApiResponse
 import com.zunza.buythedip.watchlist.dto.WatchlistCreateRequest
 import com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse
+import com.zunza.buythedip.watchlist.dto.WatchlistItemAddRequest
 import com.zunza.buythedip.watchlist.dto.WatchlistResponse
 import com.zunza.buythedip.watchlist.service.WatchlistService
 import org.springframework.http.HttpStatus
@@ -43,11 +44,12 @@ class WatchlistController(
         return ResponseEntity.status(HttpStatus.CREATED.value()).build()
     }
 
-//    @PostMapping("/api/watchlists/{watchlistId}/items")
-//    fun addItem(
-//        @PathVariable watchlistId: Long,
-//        @RequestBody addWatchlistItemRequest: AddWatchlistItemRequest
-//    ) {
-//
-//    }
+    @PostMapping("/{watchlistId}/items")
+    fun addItem(
+        @PathVariable watchlistId: Long,
+        @RequestBody watchlistItemAddRequest: WatchlistItemAddRequest
+    ): ResponseEntity<ApiResponse<Unit>> {
+        watchlistService.addItem(watchlistId, watchlistItemAddRequest)
+        return ResponseEntity.status(HttpStatus.CREATED.value()).build()
+    }
 }
