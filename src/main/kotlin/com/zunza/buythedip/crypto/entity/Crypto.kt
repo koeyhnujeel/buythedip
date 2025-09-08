@@ -8,8 +8,8 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
+import java.math.BigDecimal
 
 @Entity
 class Crypto(
@@ -17,7 +17,7 @@ class Crypto(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 50)
     val name: String,
 
     @Column(nullable = false, length = 20)

@@ -1,7 +1,6 @@
 package com.zunza.buythedip.util
 
 import com.zunza.buythedip.crypto.entity.Crypto
-import com.zunza.buythedip.crypto.entity.CryptoMetadata
 import com.zunza.buythedip.user.constant.UserType
 import com.zunza.buythedip.user.entity.User
 import com.zunza.buythedip.watchlist.entity.Watchlist
@@ -16,13 +15,6 @@ object TestDataFactory {
             name = name,
             symbol = symbol,
             logo = logo,
-            metadata = CryptoMetadata(
-                description = "$symbol description",
-                website = listOf("$symbol.com"),
-                twitter = listOf("$symbol twitter"),
-                explorer = listOf("$symbol explorer"),
-                tagNames = listOf(symbol.lowercase())
-            )
         )
 
     fun createWatchlist(user: User?, name: String, sortOrder: Int, isDefault: Boolean = false, isSystem: Boolean = false): Watchlist =

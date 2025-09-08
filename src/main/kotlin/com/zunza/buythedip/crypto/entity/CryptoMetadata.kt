@@ -20,7 +20,7 @@ class CryptoMetadata(
     val id: Long = 0,
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "crypto_id")
+    @JoinColumn(name = "crypto_id", nullable = false)
     val crypto: Crypto? = null,
 
     @Lob
@@ -41,5 +41,5 @@ class CryptoMetadata(
 
     @Column(columnDefinition = "TEXT")
     @Convert(converter = StringListConverter::class)
-    val tagNames: List<String> = listOf()
+    val tags: List<String> = listOf()
 ) : BaseEntity()
