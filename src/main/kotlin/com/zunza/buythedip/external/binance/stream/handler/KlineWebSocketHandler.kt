@@ -44,3 +44,4 @@ class KlineWebSocketHandler(
         logger.info{"[KLINE - $interval] ${message.payload.toByteArray(Charsets.UTF_8).size}bytes"}
     }
 }
+
