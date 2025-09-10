@@ -39,6 +39,8 @@ dependencies {
 	implementation("io.github.openfeign.querydsl:querydsl-jpa:6.11") //OpenFeign QueryDSL
 	ksp("io.github.openfeign.querydsl:querydsl-ksp-codegen:6.11")
 	annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:6.11:jakarta")
+	implementation("org.springframework.boot:spring-boot-starter-actuator") // actuator
+	implementation("io.micrometer:micrometer-registry-prometheus") // micrometer
 //	implementation("com.google.firebase:firebase-admin:9.2.0") // Firebase
 
 	runtimeOnly("com.mysql:mysql-connector-j")
@@ -70,4 +72,8 @@ allOpen {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.jar {
+	enabled = false
 }

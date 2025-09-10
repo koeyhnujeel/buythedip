@@ -6,6 +6,7 @@ spring:
   datasource:
     url: ${MYSQL_URL}
     username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   data:
@@ -66,7 +67,7 @@ spring:
             user-name-attribute: id
 
 jwt:
-  key:
+  key: ${JWT_KEY}
   access-token-expire-time: ${ACCESS_JWT_EXPIRE_TIME}
   refresh-token-expire-time: ${REFRESH_JWT_EXPIRE_TIME}
 
