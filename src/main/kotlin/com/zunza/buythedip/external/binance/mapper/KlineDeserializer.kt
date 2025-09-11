@@ -10,17 +10,17 @@ class KlineDeserializer : JsonDeserializer<KlineRestApiResponse>() {
         val node = p.readValueAs(Array<Any>::class.java)
         return KlineRestApiResponse(
             openTime = (node[0] as Number).toLong(),
-            open = (node[1] as String).toBigDecimal(),
-            high = (node[2] as String).toBigDecimal(),
-            low = (node[3] as String).toBigDecimal(),
-            close = (node[4] as String).toBigDecimal(),
-            volume = (node[5] as String).toBigDecimal(),
+            open = (node[1] as String).toDouble(),
+            high = (node[2] as String).toDouble(),
+            low = (node[3] as String).toDouble(),
+            close = (node[4] as String).toDouble(),
+            volume = (node[5] as String).toDouble(),
             closeTime = (node[6] as Number).toLong(),
-            quoteAssetVolume = (node[7] as String).toBigDecimal(),
+            quoteAssetVolume = (node[7] as String).toDouble(),
             numberOfTrades = (node[8] as Number).toLong(),
-            takerBuyBaseVolume = (node[9] as String).toBigDecimal(),
-            takerBuyQuoteVolume = (node[10] as String).toBigDecimal(),
-            ignore = (node[11] as String).toBigDecimal()
+            takerBuyBaseVolume = (node[9] as String).toDouble(),
+            takerBuyQuoteVolume = (node[10] as String).toDouble(),
+            ignore = (node[11] as String).toDouble()
         )
     }
 }
