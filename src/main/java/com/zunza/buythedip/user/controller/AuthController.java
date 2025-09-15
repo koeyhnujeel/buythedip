@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,6 +64,19 @@ public class AuthController {
 		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, responseCooke.toString())
 			.body(LoginResponse.createOf(resultMap.get("nickname"), resultMap.get("accessToken")));
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<ApiResponse<Void>> logout(
+		@AuthenticationPrincipal Long userId
+	) {
+		authService.logout(userId);
+		ResponseCookie responseCooke = createResponseCooke("", Duration.ZERO);
+
+		return ResponseEntity
+			.status(HttpStatus.NO_CONTENT.value())
+			.header(HttpHeaders.SET_COOKIE, responseCooke.toString())
+			.build();
 	}
 
 	private ResponseCookie createResponseCooke(

@@ -13,4 +13,8 @@ public class RedisCacheService {
 	public void set(String key, String value) {
 		redisTemplate.opsForValue().set(key, value);
 	}
+
+	public boolean delete(String key) {
+		return redisTemplate.delete(key);
+	}
 }

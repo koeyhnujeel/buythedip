@@ -22,6 +22,7 @@ import com.zunza.buythedip.user.dto.NicknameAvailableResponse;
 import com.zunza.buythedip.user.dto.SignupRequest;
 import com.zunza.buythedip.user.entity.User;
 import com.zunza.buythedip.user.exception.LoginFailedException;
+import com.zunza.buythedip.user.exception.UserNotFoundException;
 import com.zunza.buythedip.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -87,6 +88,10 @@ public class AuthService {
 			"accessToken", accessToken,
 			"refreshToken", refreshToken
 		);
+	}
+
+	public void logout(Long userId) {
+		redisCacheService.delete(userId.toString());
 	}
 
 	private void validateEmailFormat(String email) {
