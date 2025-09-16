@@ -21,6 +21,7 @@ import com.zunza.buythedip.watchlist.dto.WatchlistResponse;
 import com.zunza.buythedip.watchlist.entity.Watchlist;
 import com.zunza.buythedip.watchlist.entity.WatchlistItem;
 import com.zunza.buythedip.watchlist.exception.WatchlistAccessDeniedException;
+import com.zunza.buythedip.watchlist.exception.WatchlistItemNotFoundException;
 import com.zunza.buythedip.watchlist.exception.WatchlistNotFoundException;
 import com.zunza.buythedip.watchlist.repository.WatchlistItemRepository;
 import com.zunza.buythedip.watchlist.repository.WatchlistRepository;
@@ -112,5 +113,27 @@ public class WatchlistService {
 
 		watchlist.addWatchlistItem(watchlistItem);
 		watchlistRepository.save(watchlist);
+	}
+
+	@Transactional
+	public void deleteWatchlistItem(
+		Long userId,
+		Long watchlistId,
+		Long watchlistItemId
+	) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(UserNotFoundException::new);
+
+		Watchlist watchlist = watchlistRepository.findById(watchlistId)
+			.orElseThrow(WatchlistNotFoundException::new);
+
+		if (!watchlist.getUser().getId().equals(user.getId())) {
+			throw new WatchlistAccessDeniedException();
+		}
+
+		WatchlistItem WatchlistItem = watchlistItemRepository.findById(watchlistItemId)
+			.orElseThrow(WatchlistItemNotFoundException::new);
+
+		watchlistItemRepository.delete(WatchlistItem);
 	}
 }
