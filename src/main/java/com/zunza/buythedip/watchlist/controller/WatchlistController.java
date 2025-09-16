@@ -68,4 +68,14 @@ public class WatchlistController {
 		watchlistService.addWatchlistItem(watchlistId, watchlistItemAddRequest);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
+
+	@DeleteMapping("/{watchlistId}/items/{itemId}")
+	public ResponseEntity<ApiResponse<Void>> deleteItem(
+		@AuthenticationPrincipal Long userId,
+		@PathVariable("watchlistId") Long watchlistId,
+		@PathVariable("itemId") Long itemId
+	) {
+		watchlistService.deleteWatchlistItem(userId, watchlistId, itemId);
+		return ResponseEntity.noContent().build();
+	}
 }
