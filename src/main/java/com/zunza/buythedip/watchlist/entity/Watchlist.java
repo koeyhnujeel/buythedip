@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.zunza.buythedip.common.BaseEntity;
 import com.zunza.buythedip.user.entity.User;
+import com.zunza.buythedip.watchlist.dto.WatchlistCreateRequest;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -76,5 +77,18 @@ public class Watchlist extends BaseEntity {
 			this.watchlistItems.add(watchlistItem);
 			watchlistItem.setWatchlist(this);
 		}
+	}
+
+	public static Watchlist createOf(
+		User user,
+		WatchlistCreateRequest watchlistCreateRequest
+	) {
+		return Watchlist.builder()
+			.name(watchlistCreateRequest.getName())
+			.user(user)
+			.isDefault(false)
+			.isSystem(false)
+			.sortOrder(watchlistCreateRequest.getSortOrder())
+			.build();
 	}
 }
