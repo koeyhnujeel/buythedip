@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.zunza.buythedip.common.ApiResponse;
 import com.zunza.buythedip.watchlist.dto.WatchlistCreateRequest;
 import com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse;
+import com.zunza.buythedip.watchlist.dto.WatchlistItemAddRequest;
 import com.zunza.buythedip.watchlist.dto.WatchlistResponse;
 import com.zunza.buythedip.watchlist.service.WatchlistService;
 
@@ -57,5 +58,14 @@ public class WatchlistController {
 	) {
 		watchlistService.deleteWatchlist(userId, watchlistId);
 		return ResponseEntity.noContent().build();
+	}
+
+	@PostMapping("/{watchlistId}/items")
+	public ResponseEntity<ApiResponse<Void>> addItem(
+		@PathVariable Long watchlistId,
+		@RequestBody WatchlistItemAddRequest watchlistItemAddRequest
+	) {
+		watchlistService.addWatchlistItem(watchlistId, watchlistItemAddRequest);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 }
