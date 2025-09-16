@@ -1,18 +1,16 @@
 package com.zunza.buythedip.user.dto;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class LoginResponse {
 	private String nickname;
 	private String accessToken;
-
-	@Builder
-	private LoginResponse(String nickname, String accessToken) {
-		this.nickname = nickname;
-		this.accessToken = accessToken;
-	}
 
 	public static LoginResponse createOf(
 		String nickname,
