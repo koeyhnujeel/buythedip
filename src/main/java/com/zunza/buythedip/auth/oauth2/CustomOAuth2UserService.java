@@ -2,6 +2,7 @@ package com.zunza.buythedip.auth.oauth2;
 
 import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -14,10 +15,10 @@ import com.zunza.buythedip.auth.oauth2.dto.GoogleOAuth2Response;
 import com.zunza.buythedip.auth.oauth2.dto.KakaoOAuth2Response;
 import com.zunza.buythedip.auth.oauth2.dto.NaverOAuth2Response;
 import com.zunza.buythedip.auth.oauth2.dto.OAuth2Response;
+import com.zunza.buythedip.infrastructure.event.event.UserRegisteredEvent;
 import com.zunza.buythedip.user.constant.UserType;
 import com.zunza.buythedip.user.entity.User;
 import com.zunza.buythedip.user.repository.UserRepository;
-import com.zunza.buythedip.watchlist.service.WatchlistService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 	private final UserRepository userRepository;
-	private final WatchlistService watchlistService;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -42,7 +43,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 				User user = User.createSocialUser(oAuth2Response, createRandomNickname());
 				User savedUser = userRepository.save(user);
 
-				watchlistService.createDefaultWatchlist(savedUser);
+				eventPublisher.publishEvent(UserRegisteredEvent.createFrom(savedUser));
 				return new CustomOAuth2User(user);
 			});
 	}
