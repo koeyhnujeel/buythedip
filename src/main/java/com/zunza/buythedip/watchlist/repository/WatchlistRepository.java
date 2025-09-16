@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse;
 import com.zunza.buythedip.watchlist.dto.WatchlistResponse;
 import com.zunza.buythedip.watchlist.entity.Watchlist;
 
@@ -28,4 +29,23 @@ public interface WatchlistRepository extends JpaRepository<Watchlist, Long> {
 		"""
 	)
 	List<WatchlistResponse> findWatchlistsByUserId(@Param("userId") Long userId);
+
+	@Query(
+		"""
+		SELECT new com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse
+		wi.id,
+		c.id,
+		c.name,
+		c.symbol,
+		c.logo,
+		wi.sortOrder
+		)
+		FROM Watchlist w
+		JOIN w.watchlistItems wi
+		JOIN wi.crypto c
+		WHERE w.id = :watchlistId
+		ORDER BY wi.sortOrder ASC
+		"""
+	)
+	List<WatchlistDetailsResponse> findWatchlistDetailsById(Long watchlistId);
 }
