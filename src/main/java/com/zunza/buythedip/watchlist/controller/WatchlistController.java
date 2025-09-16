@@ -5,9 +5,11 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse;
 import com.zunza.buythedip.watchlist.dto.WatchlistResponse;
 import com.zunza.buythedip.watchlist.service.WatchlistService;
 
@@ -24,5 +26,12 @@ public class WatchlistController {
 		@AuthenticationPrincipal Long userId
 	) {
 		return ResponseEntity.ok(watchlistService.getWatchlist(userId));
+	}
+
+	@GetMapping("/{watchlistId}")
+	public ResponseEntity<List<WatchlistDetailsResponse>> getWatchlistDetails(
+		@PathVariable Long watchlistId
+	) {
+		return ResponseEntity.ok(watchlistService.getWatchlistDetails(watchlistId));
 	}
 }

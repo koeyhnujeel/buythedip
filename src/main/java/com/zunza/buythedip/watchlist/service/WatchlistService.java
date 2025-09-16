@@ -12,6 +12,7 @@ import com.zunza.buythedip.crypto.entity.Crypto;
 import com.zunza.buythedip.crypto.repository.CryptoRepository;
 import com.zunza.buythedip.user.entity.User;
 import com.zunza.buythedip.user.repository.UserRepository;
+import com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse;
 import com.zunza.buythedip.watchlist.dto.WatchlistResponse;
 import com.zunza.buythedip.watchlist.entity.Watchlist;
 import com.zunza.buythedip.watchlist.entity.WatchlistItem;
@@ -51,5 +52,10 @@ public class WatchlistService {
 	@Transactional(readOnly = true)
 	public List<WatchlistResponse> getWatchlist(Long userId) {
 		return watchlistRepository.findWatchlistsByUserId(userId);
+	}
+
+	@Transactional(readOnly = true)
+	public List<WatchlistDetailsResponse> getWatchlistDetails(Long watchlistId) {
+		return watchlistRepository.findWatchlistDetailsById(watchlistId);
 	}
 }
