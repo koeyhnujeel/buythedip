@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.zunza.buythedip.crypto.entity.Crypto;
 import com.zunza.buythedip.crypto.repository.CryptoRepository;
 import com.zunza.buythedip.user.entity.User;
+import com.zunza.buythedip.user.exception.UserNotFoundException;
 import com.zunza.buythedip.user.repository.UserRepository;
+import com.zunza.buythedip.watchlist.dto.WatchlistCreateRequest;
 import com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse;
 import com.zunza.buythedip.watchlist.dto.WatchlistResponse;
 import com.zunza.buythedip.watchlist.entity.Watchlist;
@@ -57,5 +59,16 @@ public class WatchlistService {
 	@Transactional(readOnly = true)
 	public List<WatchlistDetailsResponse> getWatchlistDetails(Long watchlistId) {
 		return watchlistRepository.findWatchlistDetailsById(watchlistId);
+	}
+
+	@Transactional
+	public void createWatchlist(
+		Long userId,
+		WatchlistCreateRequest watchlistCreateRequest
+	) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(UserNotFoundException::new);
+
+		watchlistRepository.save(Watchlist.createOf(user, watchlistCreateRequest));
 	}
 }
