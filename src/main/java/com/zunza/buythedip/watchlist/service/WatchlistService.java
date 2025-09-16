@@ -9,12 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zunza.buythedip.crypto.entity.Crypto;
+import com.zunza.buythedip.crypto.exception.CryptoNotFoundException;
 import com.zunza.buythedip.crypto.repository.CryptoRepository;
 import com.zunza.buythedip.user.entity.User;
 import com.zunza.buythedip.user.exception.UserNotFoundException;
 import com.zunza.buythedip.user.repository.UserRepository;
 import com.zunza.buythedip.watchlist.dto.WatchlistCreateRequest;
 import com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse;
+import com.zunza.buythedip.watchlist.dto.WatchlistItemAddRequest;
 import com.zunza.buythedip.watchlist.dto.WatchlistResponse;
 import com.zunza.buythedip.watchlist.entity.Watchlist;
 import com.zunza.buythedip.watchlist.entity.WatchlistItem;
@@ -90,5 +92,25 @@ public class WatchlistService {
 		}
 
 		watchlistRepository.delete(watchlist);
+	}
+
+	@Transactional
+	public void addWatchlistItem(
+		Long watchlistId,
+		WatchlistItemAddRequest request
+	) {
+		Long cryptoId = request.getCryptoId();
+		int sortOrder = request.getSortOrder();
+
+		Crypto crypto = cryptoRepository.findById(cryptoId)
+			.orElseThrow(CryptoNotFoundException::new);
+
+		WatchlistItem watchlistItem = WatchlistItem.createOf(crypto, sortOrder);
+
+		Watchlist watchlist = watchlistRepository.findById(watchlistId)
+			.orElseThrow(WatchlistNotFoundException::new);
+
+		watchlist.addWatchlistItem(watchlistItem);
+		watchlistRepository.save(watchlist);
 	}
 }
