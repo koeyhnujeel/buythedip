@@ -2,11 +2,14 @@ package com.zunza.buythedip.crypto.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.zunza.buythedip.crypto.dto.CryptoSuggestResponse;
 import com.zunza.buythedip.crypto.dto.TickerResponse;
+import com.zunza.buythedip.crypto.repository.CryptoRepository;
 import com.zunza.buythedip.external.binance.dto.TickerData;
 import com.zunza.buythedip.infrastructure.redis.constant.Channels;
 import com.zunza.buythedip.infrastructure.redis.constant.RedisKey;
@@ -20,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class CryptoService {
+	private final CryptoRepository cryptoRepository;
 	private final RedisCacheService redisCacheService;
 	private final RedisMessagePublisher redisMessagePublisher;
 
@@ -42,6 +46,10 @@ public class CryptoService {
 			Channels.TICKER_CHANNEL.getTopic(),
 			tickerResponse
 		);
+	}
+
+	public List<CryptoSuggestResponse> suggestCrypto(String keyword) {
+		return cryptoRepository.findByKeyword(keyword);
 	}
 
 	private BigDecimal getChangeRate(BigDecimal openPrice, BigDecimal currentPrice) {
