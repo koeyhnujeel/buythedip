@@ -16,13 +16,12 @@ import com.zunza.buythedip.auth.jwt.JwtProvider;
 import com.zunza.buythedip.auth.user.CustomUserDetails;
 import com.zunza.buythedip.infrastructure.event.event.UserRegisteredEvent;
 import com.zunza.buythedip.infrastructure.redis.service.RedisCacheService;
-import com.zunza.buythedip.user.dto.EmailAvailableResponse;
 import com.zunza.buythedip.user.dto.LoginRequest;
-import com.zunza.buythedip.user.dto.NicknameAvailableResponse;
 import com.zunza.buythedip.user.dto.SignupRequest;
 import com.zunza.buythedip.user.entity.User;
+import com.zunza.buythedip.user.exception.DuplicateEmailException;
+import com.zunza.buythedip.user.exception.DuplicateNicknameException;
 import com.zunza.buythedip.user.exception.LoginFailedException;
-import com.zunza.buythedip.user.exception.UserNotFoundException;
 import com.zunza.buythedip.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -41,21 +40,17 @@ public class AuthService {
 	private final RedisCacheService redisCacheService;
 	private final AuthenticationManager authenticationManager;
 
-	public EmailAvailableResponse isEmailAvailable(String email) {
+	public void isEmailAvailable(String email) {
 		validateEmailFormat(email);
 		if (userRepository.existsByEmail(email)) {
-			return EmailAvailableResponse.createFrom(false);
-		} else {
-			return EmailAvailableResponse.createFrom(true);
+			throw new DuplicateEmailException();
 		}
 	}
 
-	public NicknameAvailableResponse isNicknameAvailable(String nickname) {
+	public void isNicknameAvailable(String nickname) {
 		validateNicknameFormat(nickname);
 		if (userRepository.existsByNickname(nickname)) {
-			return NicknameAvailableResponse.createFrom(false);
-		} else {
-			return NicknameAvailableResponse.createFrom(true);
+			throw new DuplicateNicknameException();
 		}
 	}
 

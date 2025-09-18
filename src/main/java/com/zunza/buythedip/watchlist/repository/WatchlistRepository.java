@@ -32,7 +32,7 @@ public interface WatchlistRepository extends JpaRepository<Watchlist, Long> {
 
 	@Query(
 		"""
-		SELECT new com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse
+		SELECT new com.zunza.buythedip.watchlist.dto.WatchlistDetailsResponse(
 		wi.id,
 		c.id,
 		c.name,
@@ -47,5 +47,5 @@ public interface WatchlistRepository extends JpaRepository<Watchlist, Long> {
 		ORDER BY wi.sortOrder ASC
 		"""
 	)
-	List<WatchlistDetailsResponse> findWatchlistDetailsById(Long watchlistId);
+	List<WatchlistDetailsResponse> findWatchlistDetailsById(@Param("watchlistId") Long watchlistId);
 }

@@ -16,10 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zunza.buythedip.common.ApiResponse;
-import com.zunza.buythedip.user.dto.EmailAvailableResponse;
 import com.zunza.buythedip.user.dto.LoginRequest;
 import com.zunza.buythedip.user.dto.LoginResponse;
-import com.zunza.buythedip.user.dto.NicknameAvailableResponse;
 import com.zunza.buythedip.user.dto.SignupRequest;
 import com.zunza.buythedip.user.service.AuthService;
 
@@ -33,17 +31,19 @@ public class AuthController {
 	private final AuthService authService;
 
 	@GetMapping("/signup/email/validation")
-	public ResponseEntity<EmailAvailableResponse> checkEmailDuplication(
+	public ResponseEntity<ApiResponse<Void>> checkEmailDuplication(
 		@RequestParam String email
 	) {
-		return ResponseEntity.ok(authService.isEmailAvailable(email));
+		authService.isEmailAvailable(email);
+		return ResponseEntity.ok().build();
 	}
 
 	@GetMapping("/signup/nickname/validation")
-	public ResponseEntity<NicknameAvailableResponse> checkNicknameDuplication(
+	public ResponseEntity<ApiResponse<Void>> checkNicknameDuplication(
 		@RequestParam String nickname
 	) {
-		return ResponseEntity.ok(authService.isNicknameAvailable(nickname));
+		authService.isNicknameAvailable(nickname);
+		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/signup")
