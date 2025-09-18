@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zunza.buythedip.crypto.entity.Crypto;
@@ -36,7 +37,7 @@ public class WatchlistService {
 	private final CryptoRepository cryptoRepository;
 	private final UserRepository userRepository;
 
-	@Transactional
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void createDefaultWatchlist(User user) {
 		List<String> symbols = List.of("BTC", "ETH", "XRP", "BNB", "SOL", "DOGE", "TRX", "ADA");
 		List<Crypto> cryptos = cryptoRepository.findBySymbols(symbols);
