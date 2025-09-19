@@ -5,10 +5,16 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.zunza.buythedip.crypto.dto.CryptoDetailsResponse;
 import com.zunza.buythedip.crypto.dto.CryptoSuggestResponse;
 import com.zunza.buythedip.crypto.dto.TickerResponse;
+import com.zunza.buythedip.crypto.entity.CryptoMetadata;
+import com.zunza.buythedip.crypto.exception.CryptoMetadataNotFoundException;
+import com.zunza.buythedip.crypto.repository.CryptoMetadataRepository;
 import com.zunza.buythedip.crypto.repository.CryptoRepository;
 import com.zunza.buythedip.external.binance.dto.TickerData;
 import com.zunza.buythedip.infrastructure.redis.constant.Channels;
@@ -26,6 +32,7 @@ public class CryptoService {
 	private final CryptoRepository cryptoRepository;
 	private final RedisCacheService redisCacheService;
 	private final RedisMessagePublisher redisMessagePublisher;
+	private final CryptoMetadataRepository cryptoMetadataRepository;
 
 	public void publishTicker(TickerData data) {
 		BigDecimal openPrice = getOpenPrice(data.getSymbol());
@@ -48,8 +55,18 @@ public class CryptoService {
 		);
 	}
 
+	@Transactional(readOnly = true)
 	public List<CryptoSuggestResponse> suggestCrypto(String keyword) {
 		return cryptoRepository.findByKeyword(keyword);
+	}
+
+	@Transactional(readOnly = true)
+	@Cacheable(cacheNames = "CRYPTO:DETAILS", key = "#cryptoId")
+	public CryptoDetailsResponse getCryptoDetails(Long cryptoId) {
+		CryptoMetadata metadata = cryptoMetadataRepository.findByCryptoId(cryptoId)
+			.orElseThrow(CryptoMetadataNotFoundException::new);
+
+		return CryptoDetailsResponse.createFrom(metadata);
 	}
 
 	private BigDecimal getChangeRate(BigDecimal openPrice, BigDecimal currentPrice) {
