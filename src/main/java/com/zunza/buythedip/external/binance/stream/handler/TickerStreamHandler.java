@@ -9,7 +9,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zunza.buythedip.crypto.service.CryptoService;
 import com.zunza.buythedip.external.binance.dto.SubscribeRequest;
-import com.zunza.buythedip.external.binance.dto.TickerStreamResponse;
+import com.zunza.buythedip.external.binance.dto.tickerstream.TickerStreamResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
