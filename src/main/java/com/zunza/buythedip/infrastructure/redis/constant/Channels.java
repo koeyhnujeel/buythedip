@@ -1,12 +1,14 @@
 package com.zunza.buythedip.infrastructure.redis.constant;
 
+import com.zunza.buythedip.crypto.dto.ChartResponse;
 import com.zunza.buythedip.crypto.dto.TickerResponse;
 
 import lombok.Getter;
 
 @Getter
 public enum Channels {
-	TICKER_CHANNEL("ticker", "/topic/ticker/", TickerResponse.class);
+	TICKER_CHANNEL("ticker", "/topic/ticker/", TickerResponse.class),
+	CHART_CHANNEL("chart", "/topic/chart/", ChartResponse.class);
 
 	private String topic;
 	private String destinationPrefix;

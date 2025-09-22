@@ -24,6 +24,11 @@ public class RedisListenerConfig {
 	}
 
 	@Bean
+	public ChannelTopic chartChannelTopic() {
+		return new ChannelTopic(Channels.CHART_CHANNEL.getTopic());
+	}
+
+	@Bean
 	public MessageListenerAdapter listenerAdapter() {
 		return new MessageListenerAdapter(subscriber, "sendMessage");
 	}
@@ -33,6 +38,7 @@ public class RedisListenerConfig {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(redisConnectionFactory);
 		container.addMessageListener(listenerAdapter(), tickerChannelTopic());
+		container.addMessageListener(listenerAdapter(), chartChannelTopic());
 		return container;
 	}
 }

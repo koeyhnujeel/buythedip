@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zunza.buythedip.crypto.dto.ChartResponse;
 import com.zunza.buythedip.crypto.dto.TickerResponse;
 import com.zunza.buythedip.infrastructure.redis.constant.Channels;
 
@@ -54,10 +55,12 @@ public class RedisMessageSubscriber {
 	}
 
 	private String getDestination(Channels channel, Object payload) {
-		if (payload instanceof TickerResponse tickerResponse) {
-			return channel.getDestinationPrefix() + tickerResponse.getSymbol();
-		}
-
-		return "";
+		return switch (payload) {
+			case TickerResponse tickerResponse ->
+				channel.getDestinationPrefix() + tickerResponse.getSymbol();
+			case ChartResponse chartResponse ->
+				channel.getDestinationPrefix() + chartResponse.getSymbol() + "/" + chartResponse.getInterval();
+			default -> "";
+		};
 	}
 }
