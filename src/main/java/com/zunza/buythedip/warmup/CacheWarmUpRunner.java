@@ -11,6 +11,9 @@ import com.zunza.buythedip.infrastructure.redis.service.RedisCacheService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * TODO: 로컬 캐시 적용하기
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

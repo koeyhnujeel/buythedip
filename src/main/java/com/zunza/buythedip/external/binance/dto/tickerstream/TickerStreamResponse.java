@@ -1,4 +1,4 @@
-package com.zunza.buythedip.external.binance.dto;
+package com.zunza.buythedip.external.binance.dto.tickerstream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
