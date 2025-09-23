@@ -9,13 +9,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zunza.buythedip.common.annotation.CacheableWithDistributedLock;
+import com.zunza.buythedip.crypto.dto.ChartResponse;
 import com.zunza.buythedip.crypto.dto.CryptoDetailsResponse;
 import com.zunza.buythedip.crypto.dto.CryptoSuggestResponse;
 import com.zunza.buythedip.crypto.dto.TickerResponse;
 import com.zunza.buythedip.crypto.exception.CryptoMetadataNotFoundException;
 import com.zunza.buythedip.crypto.repository.CryptoMetadataRepository;
 import com.zunza.buythedip.crypto.repository.CryptoRepository;
-import com.zunza.buythedip.external.binance.dto.TickerData;
+import com.zunza.buythedip.external.binance.client.BinanceClient;
+import com.zunza.buythedip.external.binance.dto.klinestream.KlineData;
+import com.zunza.buythedip.external.binance.dto.tickerstream.TickerData;
 import com.zunza.buythedip.infrastructure.redis.constant.Channels;
 import com.zunza.buythedip.infrastructure.redis.constant.RedisKey;
 import com.zunza.buythedip.infrastructure.redis.pubsub.RedisMessagePublisher;
@@ -28,6 +31,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class CryptoService {
+	private static final String SYMBOL_SUFFIX = "USDT";
+
+	private final BinanceClient binanceClient;
 	private final CryptoRepository cryptoRepository;
 	private final RedisCacheService redisCacheService;
 	private final RedisMessagePublisher redisMessagePublisher;
@@ -39,10 +45,11 @@ public class CryptoService {
 		BigDecimal changePrice = currentPrice.subtract(openPrice);
 		BigDecimal changeRate = getChangeRate(openPrice, currentPrice);
 
-		int scale = getScale(data.getSymbol());
+		String tickSize = redisCacheService.get(RedisKey.TICK_SIZE_KEY_PREFIX.getValue() + data.getSymbol());
+		int scale = getScale(tickSize);
 
 		TickerResponse tickerResponse = TickerResponse.createOf(
-			data.getSymbol().replace("USDT", ""),
+			data.getSymbol().replace(SYMBOL_SUFFIX, ""),
 			currentPrice.setScale(scale, RoundingMode.HALF_UP),
 			changePrice.setScale(scale, RoundingMode.HALF_UP),
 			changeRate.setScale(2, RoundingMode.HALF_UP)
@@ -51,6 +58,19 @@ public class CryptoService {
 		redisMessagePublisher.publishMessage(
 			Channels.TICKER_CHANNEL.getTopic(),
 			tickerResponse
+		);
+	}
+
+	public void publishKline(KlineData data) {
+		String tickSizeKey = RedisKey.TICK_SIZE_KEY_PREFIX.getValue() + data.getSymbol();
+		String tickSize = redisCacheService.get(tickSizeKey);
+		int scale = getScale(tickSize);
+
+		ChartResponse chartResponse = ChartResponse.createUpdateResponse(data, scale);
+
+		redisMessagePublisher.publishMessage(
+			Channels.CHART_CHANNEL.getTopic(),
+			chartResponse
 		);
 	}
 
@@ -67,6 +87,22 @@ public class CryptoService {
 			.orElseThrow(CryptoMetadataNotFoundException::new);
 	}
 
+	public List<ChartResponse> getCryptoChart(
+		String symbol,
+		String interval
+	) {
+		String binanceSymbol = symbol + SYMBOL_SUFFIX;
+		String tickSizeKey = RedisKey.TICK_SIZE_KEY_PREFIX.getValue() + binanceSymbol;
+		String tickSize = redisCacheService.get(tickSizeKey);
+		int scale = getScale(tickSize);
+
+		return binanceClient.getKline(binanceSymbol, interval, 200)
+			.block()
+			.stream()
+			.map(kline -> ChartResponse.createHistoryResponse(kline, scale))
+			.toList();
+	}
+
 	private BigDecimal getChangeRate(BigDecimal openPrice, BigDecimal currentPrice) {
 		if (openPrice.compareTo(BigDecimal.ZERO) == 0) {
 			return BigDecimal.ZERO;
@@ -77,8 +113,7 @@ public class CryptoService {
 			.multiply(BigDecimal.valueOf(100));
 	}
 
-	private int getScale(String symbol) {
-		String tickSize = redisCacheService.get(RedisKey.TICK_SIZE_KEY_PREFIX.getValue() + symbol);
+	private int getScale(String tickSize) {
 		BigDecimal tickSizeDecimal = new BigDecimal(tickSize).stripTrailingZeros();
 		return Math.max(0, tickSizeDecimal.scale());
 	}

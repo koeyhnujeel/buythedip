@@ -9,12 +9,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zunza.buythedip.crypto.dto.ChartResponse;
 import com.zunza.buythedip.crypto.dto.CryptoDetailsResponse;
 import com.zunza.buythedip.crypto.dto.CryptoSuggestResponse;
 import com.zunza.buythedip.crypto.service.CryptoService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/cryptos")
 @RequiredArgsConstructor
@@ -33,5 +36,13 @@ public class CryptoController {
 		@PathVariable Long cryptoId
 	) {
 		return ResponseEntity.ok(cryptoService.getCryptoDetails(cryptoId));
+	}
+
+	@GetMapping("/chart")
+	public ResponseEntity<List<ChartResponse>> getCryptoChart(
+		@RequestParam String symbol,
+		@RequestParam(defaultValue = "15m") String interval
+	) {
+		return ResponseEntity.ok(cryptoService.getCryptoChart(symbol, interval));
 	}
 }
