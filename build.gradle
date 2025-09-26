@@ -38,6 +38,8 @@ dependencies {
 	implementation 'org.redisson:redisson-spring-boot-starter:3.51.0' // Redisson
 	implementation 'org.springframework.boot:spring-boot-starter-actuator' // actuator
 	implementation 'io.micrometer:micrometer-registry-prometheus' // micrometer
+	implementation 'net.javacrumbs.shedlock:shedlock-spring:6.9.0' // ShedLock
+	implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.9.0'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
