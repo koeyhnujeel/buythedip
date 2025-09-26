@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -13,11 +14,9 @@ public @interface CacheableWithDistributedLock {
 
 	String key() default "";
 
-	long maxWaitTime() default 5000;
+	long maxWaitTime() default 5;
 
-	long lockExpireTime() default 30;
+	long lockExpireTime() default 10;
 
-	long retryInterval() default 100;
-
-	boolean allowFallback() default true;
+	TimeUnit timeUnit() default TimeUnit.SECONDS;
 }
