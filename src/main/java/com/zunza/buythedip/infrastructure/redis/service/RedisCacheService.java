@@ -21,4 +21,8 @@ public class RedisCacheService {
 	public boolean delete(String key) {
 		return redisTemplate.delete(key);
 	}
+
+	public boolean hasKey(String key) {
+		return redisTemplate.hasKey(key);
+	}
 }
