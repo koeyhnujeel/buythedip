@@ -37,12 +37,13 @@ public interface WatchlistRepository extends JpaRepository<Watchlist, Long> {
 		c.id,
 		c.name,
 		c.symbol,
-		c.logo,
+		m.logo,
 		wi.sortOrder
 		)
 		FROM Watchlist w
 		JOIN w.watchlistItems wi
 		JOIN wi.crypto c
+		JOIN c.metadata m
 		WHERE w.id = :watchlistId
 		ORDER BY wi.sortOrder ASC
 		"""

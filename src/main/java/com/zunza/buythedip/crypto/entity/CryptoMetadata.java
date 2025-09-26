@@ -5,7 +5,6 @@ import java.util.List;
 import com.zunza.buythedip.common.BaseEntity;
 import com.zunza.buythedip.crypto.converter.StringListConverter;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -32,6 +31,9 @@ public class CryptoMetadata extends BaseEntity {
 	@JoinColumn(name = "crypto_id", nullable = false)
 	private Crypto crypto;
 
+	@Column(nullable = false)
+	private String logo;
+
 	@Lob
 	@Column(columnDefinition = "TEXT")
 	private String description;
@@ -55,4 +57,10 @@ public class CryptoMetadata extends BaseEntity {
 	@Column(columnDefinition = "TEXT")
 	@Convert(converter = StringListConverter.class)
 	private List<String> tags;
+
+	@Column(nullable = false)
+	private int marketCapRank;
+
+	@Column(nullable = false)
+	private Double tickSize;
 }

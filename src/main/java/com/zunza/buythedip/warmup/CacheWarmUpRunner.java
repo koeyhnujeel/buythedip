@@ -28,11 +28,11 @@ public class CacheWarmUpRunner implements ApplicationRunner {
 		long startTime = System.currentTimeMillis();
 		log.info("tick size 캐싱 작업 시작");
 
-		cryptoRepository.findAll()
+		cryptoRepository.findAllWithMetadata()
 			.forEach(crypto ->
 				redisCacheService.set(
 					RedisKey.TICK_SIZE_KEY_PREFIX.getValue() + crypto.getSymbol() + SYMBOL_SUFFIX,
-					crypto.getTickSize().toString()
+					crypto.getMetadata().getTickSize().toString()
 				)
 			);
 

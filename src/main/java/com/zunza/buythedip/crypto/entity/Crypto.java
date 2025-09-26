@@ -28,12 +28,6 @@ public class Crypto extends BaseEntity {
 	@Column(nullable = false, length = 20)
 	private String symbol;
 
-	@Column
-	private String logo;
-
-	@Column(nullable = false)
-	private Double tickSize;
-
 	@OneToOne(
 		mappedBy = "crypto",
 		cascade = CascadeType.ALL,
