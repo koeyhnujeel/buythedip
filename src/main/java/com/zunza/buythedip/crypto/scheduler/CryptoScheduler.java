@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+
 import com.zunza.buythedip.crypto.repository.CryptoRepository;
 import com.zunza.buythedip.external.binance.client.BinanceClient;
 import com.zunza.buythedip.infrastructure.redis.constant.RedisKey;
@@ -28,6 +30,7 @@ public class CryptoScheduler {
 	private static final String SYMBOL_SUFFIX = "USDT";
 
 	@Scheduled(cron = "3 0 0 * * *", zone = "UTC")
+	@SchedulerLock(name = "cacheDailyOpenPrice_lock")
 	public void cacheDailyOpenPrice() {
 		long startTime = System.currentTimeMillis();
 		log.info("open price 캐싱 작업을 시작합니다.");
