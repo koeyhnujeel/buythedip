@@ -23,27 +23,41 @@ public interface CryptoRepository extends JpaRepository<Crypto, Long> {
 
 	@Query(
 		"""
-		SELECT new com.zunza.buythedip.crypto.dto.CryptoSuggestResponse(
-			c.id,
-			c.name,
-			c.symbol,
-			c.logo
-		)
+		SELECT c
 		FROM Crypto c
-		WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-			OR LOWER(c.symbol) LIKE LOWER(CONCAT('%', :keyword, '%'))
-		ORDER BY
-			CASE WHEN LOWER(c.symbol) = LOWER(:keyword) THEN 1
-				WHEN LOWER(c.name) = LOWER(:keyword) THEN 2
-				WHEN LOWER(c.symbol) LIKE LOWER(CONCAT(:keyword, '%')) THEN 3
-				WHEN LOWER(c.name) LIKE LOWER(CONCAT(:keyword, '%')) THEN 4
-				WHEN LOWER(c.symbol) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 5
-				WHEN LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 6
-				ELSE 7
-			END,
-			LENGTH(c.name),
-			c.name
+		JOIN FETCH c.metadata
 		"""
 	)
-	List<CryptoSuggestResponse> findByKeyword(@Param("keyword") String keyword);
+	List<Crypto> findAllWithMetadata();
+
+	// @Query(
+	// 	"""
+	// 	SELECT new com.zunza.buythedip.crypto.dto.CryptoSuggestResponse(
+	// 		c.id,
+	// 		c.name,
+	// 		c.symbol,
+	// 		m.logo
+	// 	)
+	// 	FROM Crypto c
+	// 	JOIN c.metadata m
+	// 	WHERE c.name LIKE CONCAT('%', :keyword, '%')
+	// 		OR c.symbol LIKE CONCAT('%', :keyword, '%')
+	// 	ORDER BY m.marketCapRank asc
+	// 	"""
+	// )
+	@Query(
+		value = """
+        SELECT
+            c.id,
+            c.name,
+            c.symbol,
+            m.logo
+        FROM crypto as c
+        JOIN crypto_metadata as m on c.id = m.crypto_id
+        WHERE MATCH(c.name, c.symbol) AGAINST(?1 IN BOOLEAN MODE)
+        ORDER BY m.market_cap_rank asc
+        """,
+		nativeQuery = true
+	)
+	List<CryptoSuggestResponse> findByKeyword(String keyword);
 }
