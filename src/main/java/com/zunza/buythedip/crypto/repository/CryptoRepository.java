@@ -55,7 +55,12 @@ public interface CryptoRepository extends JpaRepository<Crypto, Long> {
         FROM crypto as c
         JOIN crypto_metadata as m on c.id = m.crypto_id
         WHERE MATCH(c.name, c.symbol) AGAINST(?1 IN BOOLEAN MODE)
-        ORDER BY m.market_cap_rank asc
+        ORDER BY
+        CASE WHEN c.symbol = ?1 OR c.name = ?1 THEN 1
+        WHEN c.symbol LIKE ?1% OR c.name LIKE ?1% THEN 2
+        ELSE 3
+        END,
+        m.market_cap_rank asc
         """,
 		nativeQuery = true
 	)
