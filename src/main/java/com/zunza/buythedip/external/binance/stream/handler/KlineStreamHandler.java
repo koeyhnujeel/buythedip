@@ -17,31 +17,21 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class KlineStreamHandler extends TextWebSocketHandler {
-	private final String interval;
-	private final List<String> symbols;
-	private final int chunkSize;
+	private final List<String> params;
 	private final ObjectMapper objectMapper;
 	private final CryptoService cryptoService;
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		for (int i = 0; i < symbols.size(); i += chunkSize) {
-			List<String> chunk = symbols.subList(i, Math.min(i + chunkSize, symbols.size()));
+		SubscribeRequest request = new SubscribeRequest(
+			"SUBSCRIBE",
+			params,
+			session.getId()
+		);
 
-			List<String> subscribeParams = chunk.stream()
-				.map(symbol -> symbol + interval)
-				.toList();
-
-			SubscribeRequest request = new SubscribeRequest(
-				"SUBSCRIBE",
-				subscribeParams,
-				String.valueOf(i / chunkSize + 1)
-			);
-
-			String payload = objectMapper.writeValueAsString(request);
-			session.sendMessage(new TextMessage(payload));
-			Thread.sleep(200);
-		}
+		String payload = objectMapper.writeValueAsString(request);
+		session.sendMessage(new TextMessage(payload));
+		Thread.sleep(200);
 	}
 
 	@Override
