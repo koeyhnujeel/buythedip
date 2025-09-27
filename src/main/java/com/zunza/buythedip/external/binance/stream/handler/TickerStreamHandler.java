@@ -17,26 +17,21 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class TickerStreamHandler extends TextWebSocketHandler {
-	private final List<String> symbols;
-	private final int chunkSize;
+	private final List<String> params;
 	private final ObjectMapper objectMapper;
 	private final CryptoService cryptoService;
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		for (int i = 0; i < symbols.size(); i += chunkSize) {
-			List<String> chunk = symbols.subList(i, Math.min(i + chunkSize, symbols.size()));
+		SubscribeRequest payloadObj = new SubscribeRequest(
+			"SUBSCRIBE",
+			params,
+			session.getId()
+		);
 
-			SubscribeRequest payloadObj = new SubscribeRequest(
-				"SUBSCRIBE",
-				chunk,
-				String.valueOf((i / chunkSize) + 1)
-			);
-
-			String payload = objectMapper.writeValueAsString(payloadObj);
-			session.sendMessage(new TextMessage(payload));
-			Thread.sleep(200);
-		}
+		String payload = objectMapper.writeValueAsString(payloadObj);
+		session.sendMessage(new TextMessage(payload));
+		Thread.sleep(200);
 	}
 
 	@Override
