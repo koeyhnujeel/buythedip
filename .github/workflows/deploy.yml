@@ -7,7 +7,7 @@ on:
 env:
   ECR_REPOSITORY: buythedip
   ECS_SERVICE: buythedip-api
-  ECS_CLUSTER: buythedip-api
+  ECS_CLUSTER: zunza
   ECS_TASK_DEFINITION: task-definition.json
   CONTAINER_NAME: api
 
