@@ -71,8 +71,8 @@ jwt:
   access-token-expire-time: ${ACCESS_JWT_EXPIRE_TIME}
   refresh-token-expire-time: ${REFRESH_JWT_EXPIRE_TIME}
 
-#management:
-#  endpoints:
-#    web:
-#      exposure:
-#        include: health, prometheus
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus

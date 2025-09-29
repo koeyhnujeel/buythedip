@@ -1,0 +1,96 @@
+{
+  "family": "buythedip-api",
+  "memory": "512",
+  "requiresCompatibilities": ["EC2"],
+  "executionRoleArn": "arn:aws:iam::160310592889:role/ecsTaskExecutionRole",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "containerDefinitions": [
+    {
+      "name": "api",
+      "image": "160310592889.dkr.ecr.ap-northeast-2.amazonaws.com/buythedip:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 0,
+          "protocol": "tcp",
+          "name": "api-8080-tcp",
+          "appProtocol": "http"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "MYSQL_URL",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/MYSQL_URL"
+        },
+        {
+          "name": "MYSQL_USERNAME",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/MYSQL_USERNAME"
+        },
+        {
+          "name": "MYSQL_PASSWORD",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/MYSQL_PASSWORD"
+        },
+        {
+          "name": "REDIS_HOST",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/REDIS_HOST"
+        },
+        {
+          "name": "REDIS_PORT",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/REDIS_PORT"
+        },
+        {
+          "name": "GOOGLE_CLIENT_ID",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/GOOGLE_CLIENT_ID"
+        },
+        {
+          "name": "GOOGLE_CLIENT_SECRET",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/GOOGLE_CLIENT_SECRET"
+        },
+        {
+          "name": "GOOGLE_REDIRECT_URI",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/GOOGLE_REDIRECT_URI"
+        },
+        {
+          "name": "NAVER_CLIENT_ID",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/NAVER_CLIENT_ID"
+        },
+        {
+          "name": "NAVER_CLIENT_SECRET",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/NAVER_CLIENT_SECRET"
+        },
+        {
+          "name": "NAVER_REDIRECT_URI",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/NAVER_REDIRECT_URI"
+        },
+        {
+          "name": "KAKAO_CLIENT_ID",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/KAKAO_CLIENT_ID"
+        },
+        {
+          "name": "KAKAO_CLIENT_SECRET",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/KAKAO_CLIENT_SECRET"
+        },
+        {
+          "name": "KAKAO_REDIRECT_URI",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/KAKAO_REDIRECT_URI"
+        },
+        {
+          "name": "JWT_KEY",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/JWT_KEY"
+        },
+        {
+          "name": "ACCESS_JWT_EXPIRE_TIME",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/ACCESS_JWT_EXPIRE_TIME"
+        },
+        {
+          "name": "REFRESH_JWT_EXPIRE_TIME",
+          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/REFRESH_JWT_EXPIRE_TIME"
+        }
+      ]
+    }
+  ]
+}
