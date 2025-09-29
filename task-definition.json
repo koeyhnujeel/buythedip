@@ -4,9 +4,6 @@
   "requiresCompatibilities": [
     "EC2"
   ],
-  "compatibilities": [
-    "EC2"
-  ],
   "memory": "512",
   "containerDefinitions": [
     {
@@ -93,6 +90,15 @@
           "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/REFRESH_JWT_EXPIRE_TIME"
         }
       ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-create-group": "true",
+          "awslogs-group": "/ecs/buythedip-api",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
       "environment": [],
       "mountPoints": [],
       "volumesFrom": []
