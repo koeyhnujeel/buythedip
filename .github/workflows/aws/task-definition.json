@@ -1,16 +1,18 @@
 {
   "family": "buythedip-api",
-  "memory": "512",
-  "requiresCompatibilities": ["EC2"],
   "executionRoleArn": "arn:aws:iam::160310592889:role/ecsTaskExecutionRole",
-  "runtimePlatform": {
-    "cpuArchitecture": "X86_64",
-    "operatingSystemFamily": "LINUX"
-  },
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "compatibilities": [
+    "EC2"
+  ],
+  "memory": "512",
   "containerDefinitions": [
     {
       "name": "api",
       "image": "160310592889.dkr.ecr.ap-northeast-2.amazonaws.com/buythedip:latest",
+      "cpu": 0,
       "essential": true,
       "portMappings": [
         {
@@ -90,7 +92,11 @@
           "name": "REFRESH_JWT_EXPIRE_TIME",
           "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/REFRESH_JWT_EXPIRE_TIME"
         }
-      ]
+      ],
+      "environment": [],
+      "mountPoints": [],
+      "volumesFrom": []
     }
-  ]
+  ],
+  "volumes": []
 }
