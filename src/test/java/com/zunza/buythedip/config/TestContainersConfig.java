@@ -1,36 +1,33 @@
 package com.zunza.buythedip.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
+
+import com.redis.testcontainers.RedisContainer;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class TestContainersConfig {
 
-	@Container
-	static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
-		.withDatabaseName("testdb")
-		.withUsername("test")
-		.withPassword("test");
-
-	@DynamicPropertySource
-	static void properties(DynamicPropertyRegistry registry) {
-		registry.add("spring.datasource.url", mysql::getJdbcUrl);
-		registry.add("spring.datasource.username", mysql::getUsername);
-		registry.add("spring.datasource.password", mysql::getPassword);
-		registry.add("spring.datasource.driver-class-name", mysql::getDriverClassName);
+	@Bean
+	@ServiceConnection
+	public MySQLContainer<?> mySQLContainer() {
+		return new MySQLContainer<>("mysql:8.0")
+			.withDatabaseName("testdb")
+			.withUsername("test")
+			.withPassword("test")
+			.withReuse(true);
 	}
 
-	@Container
-	static GenericContainer<?> redisContainer = new GenericContainer<>("redis:7.0")
-		.withExposedPorts(6379);
+	@Bean
+	public RedisContainer redisContainer() {
+		RedisContainer container = new RedisContainer("redis:7-alpine")
+			.withReuse(true);
+		container.start();
 
-	@DynamicPropertySource
-	static void redisProperties(DynamicPropertyRegistry registry) {
-		registry.add("spring.data.redis.host", redisContainer::getHost);
-		registry.add("spring.data.redis.port", () -> redisContainer.getMappedPort(6379));
+		System.setProperty("spring.data.redis.host", container.getHost());
+		System.setProperty("spring.data.redis.port", container.getMappedPort(6379).toString());
+		return container;
 	}
 }
