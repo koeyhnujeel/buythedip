@@ -16,7 +16,6 @@ public class TestContainersConfig {
 		.withUsername("test")
 		.withPassword("test");
 
-	// 스프링 DataSource에 Testcontainers 정보를 등록
 	@DynamicPropertySource
 	static void properties(DynamicPropertyRegistry registry) {
 		registry.add("spring.datasource.url", mysql::getJdbcUrl);
