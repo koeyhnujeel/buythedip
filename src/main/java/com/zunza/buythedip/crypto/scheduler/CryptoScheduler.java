@@ -31,11 +31,6 @@ public class CryptoScheduler {
 
 	private static final String SYMBOL_SUFFIX = "USDT";
 
-	/**
-	 * 1회 - 902ms
-	 * 2회 - 1033ms
-	 * 3회 - 1095ms
-	 */
 	@Scheduled(cron = "3 0 0 * * *", zone = "UTC")
 	@SchedulerLock(name = "cacheDailyOpenPrice_lock")
 	@EventListener(ApplicationReadyEvent.class)
