@@ -1,15 +1,13 @@
 {
   "family": "buythedip-api",
   "executionRoleArn": "arn:aws:iam::160310592889:role/ecsTaskExecutionRole",
-  "requiresCompatibilities": [
-    "EC2"
-  ],
+  "requiresCompatibilities": ["EC2"],
   "memory": "512",
   "containerDefinitions": [
     {
       "name": "api",
       "image": "",
-      "cpu": 0,
+      "cpu": 256,
       "essential": true,
       "portMappings": [
         {
@@ -20,76 +18,15 @@
           "appProtocol": "http"
         }
       ],
-      "secrets": [
-        {
-          "name": "MYSQL_URL",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/MYSQL_URL"
-        },
-        {
-          "name": "MYSQL_USERNAME",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/MYSQL_USERNAME"
-        },
-        {
-          "name": "MYSQL_PASSWORD",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/MYSQL_PASSWORD"
-        },
-        {
-          "name": "REDIS_HOST",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/REDIS_HOST"
-        },
-        {
-          "name": "REDIS_PORT",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/REDIS_PORT"
-        },
-        {
-          "name": "GOOGLE_CLIENT_ID",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/GOOGLE_CLIENT_ID"
-        },
-        {
-          "name": "GOOGLE_CLIENT_SECRET",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/GOOGLE_CLIENT_SECRET"
-        },
-        {
-          "name": "GOOGLE_REDIRECT_URI",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/GOOGLE_REDIRECT_URI"
-        },
-        {
-          "name": "NAVER_CLIENT_ID",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/NAVER_CLIENT_ID"
-        },
-        {
-          "name": "NAVER_CLIENT_SECRET",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/NAVER_CLIENT_SECRET"
-        },
-        {
-          "name": "NAVER_REDIRECT_URI",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/NAVER_REDIRECT_URI"
-        },
-        {
-          "name": "KAKAO_CLIENT_ID",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/KAKAO_CLIENT_ID"
-        },
-        {
-          "name": "KAKAO_CLIENT_SECRET",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/KAKAO_CLIENT_SECRET"
-        },
-        {
-          "name": "KAKAO_REDIRECT_URI",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/KAKAO_REDIRECT_URI"
-        },
-        {
-          "name": "JWT_KEY",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/JWT_KEY"
-        },
-        {
-          "name": "ACCESS_JWT_EXPIRE_TIME",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/ACCESS_JWT_EXPIRE_TIME"
-        },
-        {
-          "name": "REFRESH_JWT_EXPIRE_TIME",
-          "valueFrom": "arn:aws:ssm:ap-northeast-2:160310592889:parameter/buythedip/REFRESH_JWT_EXPIRE_TIME"
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-create-group": "true",
+          "awslogs-group": "/ecs/buythedip-api",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
         }
-      ],
+      },
       "environment": [],
       "mountPoints": [],
       "volumesFrom": []
