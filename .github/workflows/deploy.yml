@@ -36,12 +36,6 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-#    # 도커 권한 부여
-#    - name: Grant Docker permissions
-#      run: |
-#          sudo usermod -aG docker $USER
-#          sudo chmod 666 /var/run/docker.sock
-
     # Gradle로 빌드(테스트 포함)
     - name: Build with Gradle
       run: |

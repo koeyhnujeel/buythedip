@@ -3,8 +3,6 @@ package com.zunza.buythedip.crypto.scheduler;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +31,6 @@ public class CryptoScheduler {
 
 	@Scheduled(cron = "3 0 0 * * *", zone = "UTC")
 	@SchedulerLock(name = "cacheDailyOpenPrice_lock")
-	@EventListener(ApplicationReadyEvent.class)
 	public void cacheDailyOpenPrice() {
 		long startTime = System.currentTimeMillis();
 		log.info("open price 캐싱 작업을 시작합니다.");
