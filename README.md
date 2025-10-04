@@ -21,10 +21,36 @@
 | --- | --- | --- |
 | <img width="200" height="600" alt="스크린샷 2025-10-04 오후 7 35 44" src="https://github.com/user-attachments/assets/a56c1fb8-08d6-43dd-9ea0-7268078b2308" /> | <img width="200" height="600" alt="스크린샷 2025-10-04 오후 7 35 53" src="https://github.com/user-attachments/assets/bc15a7fc-daab-4c53-8244-d99fa4c9db6c" /> | <img width="200" height="600" alt="스크린샷 2025-10-04 오후 7 35 58" src="https://github.com/user-attachments/assets/885a63ac-0508-471f-a12c-e44d56e638f0" />
 
+# 주요 기능
+<details>
+  <summary><b>1. OAuth2 기반 간편 로그인</b></summary>
+  <div markdown="1">
+    
+  ```java
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		return http
+			.csrf(AbstractHttpConfigurer::disable)
+			.httpBasic(AbstractHttpConfigurer::disable)
+			.formLogin(AbstractHttpConfigurer::disable)
+			.logout(AbstractHttpConfigurer::disable)
+			.sessionManagement(session ->
+				session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+			)
 
+			.oauth2Login(oauth2 -> oauth2
+				.userInfoEndpoint(userInfo ->
+					userInfo.userService(customOAuth2UserService)
+				)
+				.successHandler(customOAuth2SuccessHandler)
+				.failureHandler(customOAuth2FailureHandler)
+			)
 
-
+      ...
+}
+```
+</div>
+</details>
 
 # ERD
 <img width="1490" height="952" alt="image" src="https://github.com/user-attachments/assets/9e574d79-6bd6-4b3a-bc6d-d5edf7c12b92" />
-
