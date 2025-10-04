@@ -29,26 +29,146 @@
   ```java
 @Bean
 public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http
-			.csrf(AbstractHttpConfigurer::disable)
-			.httpBasic(AbstractHttpConfigurer::disable)
-			.formLogin(AbstractHttpConfigurer::disable)
-			.logout(AbstractHttpConfigurer::disable)
-			.sessionManagement(session ->
-				session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			)
+  	return http
+  		.csrf(AbstractHttpConfigurer::disable)
+  		.httpBasic(AbstractHttpConfigurer::disable)
+  		.formLogin(AbstractHttpConfigurer::disable)
+  		.logout(AbstractHttpConfigurer::disable)
+  		.sessionManagement(session ->
+  			session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+  		)
 
-			.oauth2Login(oauth2 -> oauth2
-				.userInfoEndpoint(userInfo ->
-					userInfo.userService(customOAuth2UserService)
-				)
-				.successHandler(customOAuth2SuccessHandler)
-				.failureHandler(customOAuth2FailureHandler)
-			)
+  		.oauth2Login(oauth2 -> oauth2
+  			.userInfoEndpoint(userInfo ->
+  				userInfo.userService(customOAuth2UserService)
+  			)
+  			.successHandler(customOAuth2SuccessHandler)
+  			.failureHandler(customOAuth2FailureHandler)
+  		)
 
-      ...
+    ...
 }
+
+oauth2Login()을 통해 OAuth2 소셜 로그인을 사용하도록 설정하고,
+로그인 성공/실패 시 동작을 직접 구현한 핸들러(CustomOAuth2SuccessHandler, CustomOAuth2FailureHandler)로 연결합니다.
 ```
+
+```java
+@Service
+@RequiredArgsConstructor
+public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+	private final UserRepository userRepository;
+	private final ApplicationEventPublisher eventPublisher;
+
+	@Override
+	@Transactional
+	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+		OAuth2User oAuth2User = super.loadUser(userRequest);
+		String provider = userRequest.getClientRegistration().getRegistrationId();
+		OAuth2Response oAuth2Response = getOAuth2Response(oAuth2User, provider);
+
+		return userRepository.findByEmail(oAuth2Response.getEmail())
+			.map(user -> {
+				validateExistingUserForOAuth2Login(user, oAuth2Response);
+				return new CustomOAuth2User(user);
+			})
+			.orElseGet(() -> {
+				User user = User.createSocialUser(oAuth2Response, createRandomNickname());
+				User savedUser = userRepository.save(user);
+
+				eventPublisher.publishEvent(UserRegisteredEvent.createFrom(savedUser));
+				return new CustomOAuth2User(user);
+			});
+	}
+
+	private OAuth2Response getOAuth2Response(
+		OAuth2User oAuth2User,
+		String provider
+	) {
+		return switch (provider) {
+			case "google" -> new GoogleOAuth2Response(oAuth2User.getAttributes());
+			case "naver" -> new NaverOAuth2Response(oAuth2User.getAttributes());
+			case "kakao" -> new KakaoOAuth2Response(oAuth2User.getAttributes());
+			default -> throw new IllegalArgumentException("지원하지 않는 Provider 입니다.");
+		};
+	}
+
+	private void validateExistingUserForOAuth2Login(
+		User user,
+		OAuth2Response oAuth2Response
+	) {
+		if (user.getUserType() == UserType.NORMAL) {
+			throw new SocialEmailAlreadyRegisteredException();
+		}
+
+		if (user.getOAuth2Provider() != oAuth2Response.getProvider()) {
+			throw new DuplicateEmailWithDifferentProviderException();
+		}
+	}
+
+	private String createRandomNickname() {
+		return "user" + UUID.randomUUID().toString().substring(0, 8);
+	}
+}
+
+
+- OAuth2 로그인 시 사용자 정보를 불러오고, DB에 저장하거나 기존 유저와 매칭하는 역할을 합니다.
+- 구글, 네이버, 카카오 로그인 요청이 들어오면 각 Provider에 맞는 응답 객체(GoogleOAuth2Response, NaverOAuth2Response, KakaoOAuth2Response)로 변환합니다.
+- DB에 동일 이메일을 가진 사용자가 있으면 검증 후 기존 계정으로 로그인합니다.
+- 없는 경우라면 새로 소셜 계정을 생성 후 저장하고, 가입 이벤트(UserRegisteredEvent)를 발행합니다.
+```
+```java
+@Component
+@RequiredArgsConstructor
+public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+	private final JwtProvider jwtProvider;
+	private final RedisCacheService redisCacheService;
+
+	@Override
+	public void onAuthenticationSuccess(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Authentication authentication
+	) throws IOException, ServletException {
+		CustomOAuth2User oAuth2User = (CustomOAuth2User)authentication.getPrincipal();
+		Long userId = oAuth2User.getUserId();
+		String nickname = oAuth2User.getName();
+
+		String accessToken = jwtProvider.generateAccessToken(userId, oAuth2User.getAuthorities());
+		String refreshToken = jwtProvider.generateRefreshToken(userId);
+		redisCacheService.set(userId.toString(), refreshToken);
+
+		String encodedNickname = URLEncoder.encode(nickname, Charset.defaultCharset());
+		String redirectionUrl = "http://localhost:5173/login?token=" + accessToken + "&nickname=" + encodedNickname;
+
+		response.sendRedirect(redirectionUrl);
+	}
+}
+
+- 인증이 성공하면 사용자 정보를 기반으로 JWT Access Token과 Refresh Token을 생성합니다.
+- 로그인 페이지로 redirect 하면서 Access Token과 닉네임을 쿼리 파라미터로 전달합니다.
+```
+```java
+@Component
+@RequiredArgsConstructor
+public class CustomOAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler {
+
+	@Override
+	public void onAuthenticationFailure(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		AuthenticationException exception
+	) throws IOException, ServletException {
+		String errorMessage = URLEncoder.encode(exception.getMessage(), Charset.defaultCharset());
+		String redirectUrl = "http://localhost:5173/login/error?message=" + errorMessage;
+
+		response.sendRedirect(redirectUrl);
+	}
+}
+
+- 발생한 예외 메시지를 인코딩해서 실패 페이지(/login/error)로 전달합니다.
+```
+
 </div>
 </details>
 
