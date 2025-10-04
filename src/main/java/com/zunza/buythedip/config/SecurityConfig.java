@@ -20,6 +20,7 @@ import com.zunza.buythedip.auth.jwt.JwtExceptionFilter;
 import com.zunza.buythedip.auth.oauth2.CustomOAuth2FailureHandler;
 import com.zunza.buythedip.auth.oauth2.CustomOAuth2SuccessHandler;
 import com.zunza.buythedip.auth.oauth2.CustomOAuth2UserService;
+import com.zunza.buythedip.auth.oauth2.repository.RedisOAuth2AuthorizationRequestRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+	private final RedisOAuth2AuthorizationRequestRepository redisOAuth2AuthorizationRequestRepository;
 	private final AuthenticationConfiguration authenticationConfiguration;
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
@@ -71,6 +73,9 @@ public class SecurityConfig {
 			.oauth2Login(oauth2 -> oauth2
 				.userInfoEndpoint(userInfo ->
 					userInfo.userService(customOAuth2UserService)
+				)
+				.authorizationEndpoint(auth -> auth
+					.authorizationRequestRepository(redisOAuth2AuthorizationRequestRepository)
 				)
 				.successHandler(customOAuth2SuccessHandler)
 				.failureHandler(customOAuth2FailureHandler)
