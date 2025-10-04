@@ -458,16 +458,128 @@ public enum Channels {
 ```
 </details>
 
+<details>
+<summary>차트 조회</summary>
+	
+```java
+- 차트에 경우 과거 + 실시간 데이터를 조합하여 완전한 차트를 그릴 수 있었습니다.
+- WebClient를 이용하여 Binance REST API /api/v3/klines 호출
+- limit 수 만큼 Kline 데이터를 가져옵니다
+
+public Mono<List<KlineRestApiResponse>> getKline(String symbol, String interval, int limit) {
+	return webClient.get()
+		.uri(uriBuilder -> uriBuilder
+			.path("/api/v3/klines")
+			.queryParam("symbol", symbol)
+			.queryParam("interval", interval)
+			.queryParam("limit", limit)
+			.build()
+		)
+		.retrieve()
+		.bodyToMono(new ParameterizedTypeReference<>() {});
+}
+```
+```java
+- 호가 단위를 조회해 소수점 자리수를 결정
+- Kline 데이터를 ChartResponse로 변환
+
+public List<ChartResponse> getCryptoChart(String symbol, String interval) {
+    String binanceSymbol = symbol + "USDT";
+    String tickSizeKey = "TICK_SIZE:" + binanceSymbol;
+    String tickSize = redisCacheService.get(tickSizeKey);
+    int scale = getScale(tickSize);
+
+    return binanceClient.getKline(binanceSymbol, interval, 200)
+        .block()
+        .stream()
+        .map(kline -> ChartResponse.createHistoryResponse(kline, scale))
+        .toList();
+}
+```
+```java
+- Candle: open, high, low, close, timestamp 정보 포함
+- Volume: 거래량, 색상(상승: 빨강, 하락: 초록) 포함
+- createHistoryResponse: Kline API 응답을 과거 차트용으로 변환
+- createUpdateResponse: 실시간 WebSocket 업데이트 데이터를 실시간 차트용으로 변환
+
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class ChartResponse {
+	private static final String COLOR_BULLISH = "rgba(244, 67, 54, 1.0)";
+	private static final String COLOR_BEARISH = "rgba(76, 175, 80, 1.0)";
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String symbol;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String interval;
+	private Candle candle;
+	private Volume volume;
+
+	public static ChartResponse createHistoryResponse(KlineRestApiResponse response, int scale) {
+		long time = response.getOpenTime() / 1000;
+		BigDecimal open = response.getOpen().setScale(scale);
+		BigDecimal high = response.getHigh().setScale(scale);
+		BigDecimal low = response.getLow().setScale(scale);
+		BigDecimal close = response.getClose().setScale(scale);
+		BigDecimal value = response.getVolume().stripTrailingZeros();
+		String color = open.compareTo(close) >= 0 ? COLOR_BULLISH : COLOR_BEARISH;
+
+		Candle candle = new Candle(time, open, high, low, close);
+		Volume volume = new Volume(time, value, color);
+
+		return ChartResponse.builder()
+			.candle(candle)
+			.volume(volume)
+			.build();
+	}
+
+	public static ChartResponse createUpdateResponse(KlineData data, int scale) {
+		KlineDetails details = data.getDetails();
+
+		long time = details.getTime() / 1000;
+		BigDecimal open = details.getOpen().setScale(scale);
+		BigDecimal high = details.getHigh().setScale(scale);
+		BigDecimal low = details.getLow().setScale(scale);
+		BigDecimal close = details.getClose().setScale(scale);
+		BigDecimal value = details.getVolume().stripTrailingZeros();
+		String color = open.compareTo(close) >= 0 ? COLOR_BULLISH : COLOR_BEARISH;
+
+		String symbol = data.getSymbol().replace("USDT", "");
+		String interval = details.getInterval();
+
+		Candle candle = new Candle(time, open, high, low, close);
+		Volume volume = new Volume(time, value, color);
+
+		return ChartResponse.builder()
+			.symbol(symbol)
+			.interval(interval)
+			.candle(candle)
+			.volume(volume)
+			.build();
+	}
+
+	...
+}
+```
+</details>
+
 # 트러블 슈팅
 ### 1. @TransactionalEventListener
+#### 문제 상황 분석
 ```
-====문제 상황 분석====
 OAuth2 로그인 시나리오 (loadUser 메소드)
 기존에 loadUser() 메소드에 @transactional 어노테이션이 없었을 때, 트랜잭션 컨텍스트가 없는 상태였습니다.
-이때 userRepository.save(user)가 실행되면 JPA는 내부적으로 자체 트랜잭션을 생성해서 사용자를 저장합니다. 그리고 저장이 완료되면 즉시 트랜잭션을 커밋합니다. 문제는 여기서 발생합니다. eventPublisher.publishEvent(UserRegisteredEvent.createFrom(savedUser))가 호출되어 이벤트가 발행되지만, 이때는 이미 사용자 저장 트랜잭션이 완료된 후입니다. @TransactionalEventListener는 기본 설정 시 현재 트랜잭션이 커밋된 후에 실행되는데, 트랜잭션 컨텍스트가 없는 상황에서 이벤트가 제대로 처리되지 않았습니다.
+이때 userRepository.save(user)가 실행되면 JPA는 내부적으로 자체 트랜잭션을 생성해서 사용자를 저장합니다.
+그리고 저장이 완료되면 즉시 트랜잭션을 커밋합니다. 문제는 여기서 발생합니다.
+eventPublisher.publishEvent(UserRegisteredEvent.createFrom(savedUser))가 호출되어 이벤트가 발행되지만, 이때는 이미 사용자 저장 트랜잭션이 완료된 후입니다.
+@TransactionalEventListener는 기본 설정 시 현재 트랜잭션이 커밋된 후에 실행되는데, 트랜잭션 컨텍스트가 없는 상황에서 이벤트가 제대로 처리되지 않았습니다.
 
 일반 회원가입 시나리오 (signup 메소드)
-signup() 메소드는 @transactional 어노테이션이 있었기 때문에 트랜잭션 컨텍스트는 존재했습니다. 하지만 createDefaultWatchlist() 메소드에 기본 전파 옵션(REQUIRED)을 사용했을 때 문제가 발생했습니다. 기본 REQUIRED 전파 방식에서는 이미 존재하는 트랜잭션에 참여합니다. 즉, signup() 메소드의 트랜잭션과 createDefaultWatchlist() 메소드가 같은 트랜잭션을 공유하게 됩니다.
+signup() 메소드는 @transactional 어노테이션이 있었기 때문에 트랜잭션 컨텍스트는 존재했습니다.
+하지만 createDefaultWatchlist() 메소드에 기본 전파 옵션(REQUIRED)을 사용했을 때 문제가 발생했습니다.
+기본 REQUIRED 전파 방식에서는 이미 존재하는 트랜잭션에 참여합니다.
+즉, signup() 메소드의 트랜잭션과 createDefaultWatchlist() 메소드가 같은 트랜잭션을 공유하게 됩니다.
 
 WARNING: if the TransactionPhase is set to AFTER_COMMIT (the default), AFTER_ROLLBACK,
 or AFTER_COMPLETION, the transaction will have been committed or rolled back already,
@@ -475,23 +587,26 @@ but the transactional resources might still be active and accessible.
 
 source: https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/event/TransactionalEventListener.html
 
-위 내용을 보면 @TransactionalEventListener 페이즈 옵션을 기본값으로 사용하게 되면 "트랜잭션은 이미 커밋되거나 롤백되어 있을 것. 하지만 트랜잭션 관련 리소스(예: 영속성 컨텍스트, 세션 등)는 여전히 활성 상태일 수 있음. 따라서 커밋될 새로운 변경은 주의" 라고 돼있습니다.
-
-====해결 방법====
+위 내용을 보면 @TransactionalEventListener 페이즈 옵션을 기본값으로 사용하게 되면 "트랜잭션은 이미 커밋되거나 롤백되어 있을 것.
+하지만 트랜잭션 관련 리소스(예: 영속성 컨텍스트, 세션 등)는 여전히 활성 상태일 수 있음. 따라서 커밋될 새로운 변경은 주의" 라고 되어있습니다.
+```
+#### 해결 방법
+```
 @transactional 추가 (OAuth2 기반 로그인)
-loadUser() 메소드에 @transactional을 추가함으로써 전체 OAuth2 사용자 로드 과정이 하나의 트랜잭션으로 감싸집니다. 이제 userRepository.save(user)와 eventPublisher.publishEvent()가 동일한 트랜잭션 컨텍스트 내에서 실행됩니다.
+loadUser() 메소드에 @transactional을 추가함으로써 전체 OAuth2 사용자 로드 과정이 하나의 트랜잭션으로 감싸집니다.
+이제 userRepository.save(user)와 eventPublisher.publishEvent()가 동일한 트랜잭션 컨텍스트 내에서 실행됩니다.
 
 REQUIRES_NEW 전파 옵션 (createDefaultWatchlist 메소드)
 REQUIRES_NEW 전파 옵션은 새로운 독립적인 트랜잭션을 생성합니다. 이는 기존 트랜잭션을 일시 중단하고, 완전히 새로운 트랜잭션을 시작합니다.
 ```
 
 ### 2. Double.toString()으로 BigDecimal 생성 시 scale 오차 문제
+#### 문제 상황 분석
 ```
 바이낸스는 각 암호화폐별로 호가 단위(Tick Size) 정보를 제공합니다.
 이를 적용하면, 사용자는 바이낸스와 동일한 형태의 가격 정보를 확인할 수 있습니다.
 가격 데이터를 처리할 때, 호가 단위와 BigDecimal을 통해 처리하는 과정에서 표기 오류가 있었습니다.
 
-====문제 상황 분석====
 ex) Double num = 0.0001 / 기대하는 스케일 4
 
 Java에서 Double.toString() 메서드는 매우 작거나 큰 수를 지수 표기법(Scientific Notation)으로 바꿔줍니다.
@@ -510,20 +625,22 @@ System.out.println(decimal);        // 0.00010
 System.out.println(decimal.scale()); // 5
 
 스케일 4가 아닌 5를 반환 합니다.
-
-====해결 방법====
+```
+#### 해결 방법
+```
 Bigdecimal.stripTrailingZeros() 메서드를 이용해 불필요한 자리수 0을 제거한다
 ```
 
 ### 3. 분산환경에서 OAuth2 request session 오류
-```java
-====문제 상황 분석====
+#### 문제 상황 분석
+```
 Spring Security OAuth2 로그인 과정에서 Authorization Request가 세션에 저장됩니다.
 단일 서버 환경에서는 문제없이 동작하지만, ECS 등 분산 환경에서 세션이 공유되지 않으면 오류가 발생합니다.
 분산환경에서 OAuth2 인증 과정에서 Redirect 시, 사용자의 요청이 다른 서버 인스턴스로 라우팅되면서
 기존 세션에 저장된 Authorization Request를 찾지 못하는 상황이 발생합니다.
-
-====해결 방법====
+```
+#### 해결 방법
+```java
 OAuth2 인증 과정의 상태 정보를 HttpSession에서 분리하여 Redis(중앙 집중식)에서 관리하도록 개선합니다.
 
 @Component
