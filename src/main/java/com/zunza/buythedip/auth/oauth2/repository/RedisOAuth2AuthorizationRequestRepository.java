@@ -13,7 +13,9 @@ import com.zunza.buythedip.infrastructure.redis.service.RedisCacheService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RedisOAuth2AuthorizationRequestRepository implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
@@ -25,6 +27,7 @@ public class RedisOAuth2AuthorizationRequestRepository implements AuthorizationR
 	public OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
 		try {
 			String key = getKey(request.getParameter("state"));
+			log.info(key);
 			String value = cacheService.get(key);
 			return objectMapper.readValue(value, OAuth2AuthorizationRequest.class);
 		} catch (JsonProcessingException e) {
@@ -40,6 +43,7 @@ public class RedisOAuth2AuthorizationRequestRepository implements AuthorizationR
 	) {
 		try {
 			String key = getKey(authorizationRequest.getState());
+			log.info(key);
 			String authRequest = objectMapper.writeValueAsString(authorizationRequest);
 			cacheService.set(key, authRequest, 5L, TimeUnit.MINUTES);
 		} catch (JsonProcessingException e) {
@@ -54,6 +58,7 @@ public class RedisOAuth2AuthorizationRequestRepository implements AuthorizationR
 	) {
 		try {
 			String key = getKey(request.getParameter("state"));
+			log.info(key);
 			String value = cacheService.get(key);
 			cacheService.delete(key);
 			return objectMapper.readValue(value, OAuth2AuthorizationRequest.class);
