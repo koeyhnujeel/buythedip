@@ -631,7 +631,7 @@ System.out.println(decimal.scale()); // 5
 Bigdecimal.stripTrailingZeros() 메서드를 이용해 불필요한 자리수 0을 제거한다
 ```
 
-### 3. 분산환경에서 OAuth2 request session 오류
+### 3. 다중 서버 환경에서 OAuth2 request session 오류
 #### 문제 상황 분석
 ```
 Spring Security OAuth2 로그인 과정에서 Authorization Request가 세션에 저장됩니다.
